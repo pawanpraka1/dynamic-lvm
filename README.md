@@ -56,9 +56,9 @@ The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects
 
 > [!NOTE]
 > - Full LVM2 dynamic provisioning is now supported <BR>
-> - All Volume Groups, Physical VOlumes and Logical Volumes will now be dynamically provisionsed for you by OpenEBS LVM-LocalPV  <BR>
-> - There is no requirements to manuallyu provison any PV, VG or LV  <BR>
-> - Dynamic RAID proviioning is currently under development. RAID LV's can only be deployed via manual pre configuiration <BR>
+> - All Volume Groups (VG), Physical Volumes (PV) and Logical Volumes (LV) will be dynamically provisionsed for you by OpenEBS  <BR>
+> - There is no longe any need to manually provison any PV, VG or LV entities  <BR>
+> - Dynamic provisioning RAID LV's is currently in development. RAID LV's must be deployed via manual pre configuiration process<BR>
 
 ### Supported System
 
