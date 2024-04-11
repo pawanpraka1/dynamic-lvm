@@ -43,7 +43,7 @@ status: In-progress
   - [Alternatives](#alternatives)
 
 ## Summary
-This proposal charts out the design details to implement monitoring for doing effective capacity management on nodes having LVM-LocalPV Volumes.
+This proposal charts out the design details to implement monitoring for doing effective capacity management on nodes having LocalPV-LVM Volumes.
 
 ## Motivation
 Platform SREs must be able to easily query the capacity details at per node level for checking the utilization and planning purposes.
@@ -138,7 +138,7 @@ This [document](https://docs.google.com/document/d/1Nm84UJsRKlOFtxY9eSGZGDwUSJWt
 ##### Custom Exporter
 Node-exporter is able to fetch all metrics related to Logical Volumes. However, there is currently no in-built support for collecting metrics related to Volume Groups. We need a custom-exporter to scrape VG metrics like vg_size, vg_used and vg_free.  
 This [document](https://docs.google.com/document/d/1Lk__5J4MDa1fEgYFWFPCx1_Guo3Ai2EnnY1e39N7_gA/edit) describes the approach for custom-exporter deployment.
-![LVM-LocalPV-CSI-Plugin](https://user-images.githubusercontent.com/7765078/122904191-bcf4fc00-d36d-11eb-8219-1e0a475728da.png)
+![LocalPV-LVM-CSI-Plugin](https://user-images.githubusercontent.com/7765078/122904191-bcf4fc00-d36d-11eb-8219-1e0a475728da.png)
 
 ### Sample Dashboards
 Below are sample Grafana dashboards:

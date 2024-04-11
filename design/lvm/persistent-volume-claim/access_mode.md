@@ -67,7 +67,7 @@ spec:
 
 ### Test Plan
 
-- Provision an application with LVM-LocalPV supported access mode and verify accessibility of volume from application.
+- Provision an application with LocalPV-LVM supported access mode and verify accessibility of volume from application.
 - Provision an application with unsupported access modes and verify that volume should not get provisioned.
 - Provision multiple applications on the same volume and verify that only one application instance should be in running state.
 

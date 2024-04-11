@@ -35,7 +35,7 @@ env:
 ```
 It is recommended is to label all the nodes with the same key, they can have different values for the given keys, but all keys should be present on all the worker node.
 
-Once we have labeled the node, we can install the lvm driver. The driver will pick the keys from env "ALLOWED_TOPOLOGIES" and add that as the supported topology key. If the driver is already installed and you want to add a new topology information, you can edit the LVM-LocalPV CSI driver daemon sets (openebs-lvm-node).
+Once we have labeled the node, we can install the lvm driver. The driver will pick the keys from env "ALLOWED_TOPOLOGIES" and add that as the supported topology key. If the driver is already installed and you want to add a new topology information, you can edit the LocalPV-LVM CSI driver daemon sets (openebs-lvm-node).
 
 
 ```sh

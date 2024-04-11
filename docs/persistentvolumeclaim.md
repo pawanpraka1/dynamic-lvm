@@ -74,7 +74,7 @@ Following matrix shows supported PersistentVolumeClaim parameters for lvm-localp
 
 ### AccessMode
 
-LVM-LocalPV supports only `ReadWriteOnce` access mode i.e volume can be mounted as read-write by a single node. AccessMode is a required field, if the field is unspecified then it will lead to a creation error. For more information about access modes workflow click [here](../design/lvm/persistent-volume-claim/access_mode.md).
+LocalPV-LVM supports only `ReadWriteOnce` access mode i.e volume can be mounted as read-write by a single node. AccessMode is a required field, if the field is unspecified then it will lead to a creation error. For more information about access modes workflow click [here](../design/lvm/persistent-volume-claim/access_mode.md).
 ```yaml
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -127,7 +127,7 @@ spec:
 
 ### VolumeMode (Optional)
 
-LVM-LocalPV supports two kind of volume modes(Defaults to Filesystem mode):
+LocalPV-LVM supports two kind of volume modes(Defaults to Filesystem mode):
 - Block  (Block mode can be used in a case where application itself maintains filesystem)
 - Filesystem (Application which requires filesystem as a prerequisite)
 Note: If unspecified defaults to **Filesystem** mode. More information about workflow

@@ -1,5 +1,5 @@
 ---
-title: LVM-LocalPV VG Pattern
+title: LocalPV-LVM VG Pattern
 authors:
   - "@pawanpraka1"
 owners:
@@ -9,10 +9,10 @@ last-updated: 2021-06-16
 status: Implemented
 ---
 
-# LVM-LocalPV Support of VG Pattern
+# LocalPV-LVM Support of VG Pattern
 
 ## Table of Contents
-- [LVM-LocalPV Support of VG Pattern](#lvm-localpv-support-of-vg-pattern)
+- [LocalPV-LVM Support of VG Pattern](#lvm-localpv-support-of-vg-pattern)
   - [Table of Contents](#table-of-contents)
   - [Summary](#summary)
   - [Motivation](#motivation)

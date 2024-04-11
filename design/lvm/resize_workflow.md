@@ -1,5 +1,5 @@
 ---
-title: LVM-LocalPV Volume Expansion
+title: LocalPV-LVM Volume Expansion
 authors:
   - "@pawanpraka1"
 owners:
@@ -9,11 +9,11 @@ last-updated: 2021-05-28
 status: Implemented
 ---
 
-# LVM-LocalPV Volume Expansion
+# LocalPV-LVM Volume Expansion
 
 ## Table of Contents
 
-- [LVM-LocalPV Volume Expansion](#lvm-localpv-volume-expansion)
+- [LocalPV-LVM Volume Expansion](#lvm-localpv-volume-expansion)
   - [Table of Contents](#table-of-contents)
   - [Summary](#summary)
   - [Motivation](#motivation)
@@ -33,13 +33,13 @@ status: Implemented
 
 ## Summary
 
-This proposal charts out the design details to implement expansion workflow on LVM-LocalPV Volumes.
+This proposal charts out the design details to implement expansion workflow on LocalPV-LVM Volumes.
 
 ## Motivation
 
 ### Goals
 
-- As a user, I should be able to resize the volumes provisioned via LVM-LocalPV by updating the size
+- As a user, I should be able to resize the volumes provisioned via LocalPV-LVM by updating the size
   on PersistentVolumeClaim(PVC).
 
 ### Non-Goals

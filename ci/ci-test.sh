@@ -19,6 +19,7 @@ set -e
 LVM_CHART=deploy/helm/charts
 SNAP_CLASS="$(realpath deploy/sample/lvmsnapclass.yaml)"
 export OPENEBS_NAMESPACE="openebs"
+export LVM_NAMESPACE="openebs"
 
 export TEST_DIR="tests"
 

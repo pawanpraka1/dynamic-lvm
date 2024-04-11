@@ -1,5 +1,5 @@
 ---
-title: LVM-LocalPV Shared Volume
+title: LocalPV-LVM Shared Volume
 authors:
   - "@pawanpraka1"
 owners:
@@ -9,10 +9,10 @@ last-updated: 2021-06-16
 status: Implemented
 ---
 
-# LVM-LocalPV Shared Volume
+# LocalPV-LVM Shared Volume
 
 ## Table of Contents
-- [LVM-LocalPV Shared Volume](#lvm-localpv-shared-volume)
+- [LocalPV-LVM Shared Volume](#lvm-localpv-shared-volume)
   - [Table of Contents](#table-of-contents)
   - [Summary](#summary)
   - [Motivation](#motivation)

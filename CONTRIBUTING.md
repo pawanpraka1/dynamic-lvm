@@ -1,4 +1,4 @@
-# Contributing to LVM-LocalPV
+# Contributing to LocalPV-LVM
 
 LVM LocalPV uses the standard GitHub pull requests process to review and accept contributions.  There are several areas that could use your help. For starters, you could help in improving the sections in this document by either creating a new issue describing the improvement or submitting a pull request to this repository. The issues are maintained at [lvm-localpv/issues](https://github.com/openebs/lvm-localpv/issues) repository.
 
@@ -9,7 +9,7 @@ LVM LocalPV uses the standard GitHub pull requests process to review and accept 
 
 ## Steps to Contribute
 
-LVM-LocalPV is an Apache 2.0 Licensed project and all your commits should be signed with Developer Certificate of Origin. See [Sign your work](#sign-your-work).
+LocalPV-LVM is an Apache 2.0 Licensed project and all your commits should be signed with Developer Certificate of Origin. See [Sign your work](#sign-your-work).
 
 * Find an issue to work on or create a new issue. The issues are maintained at [lvm-localpv/issues](https://github.com/openebs/lvm-localpv/issues). You can pick up from a list of [good-first-issues](https://github.com/openebs/lvm-localpv/labels/good%20first%20issue).
 * Claim your issue by commenting your intent to work on it to avoid duplication of efforts.

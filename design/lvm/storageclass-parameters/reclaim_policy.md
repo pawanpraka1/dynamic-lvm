@@ -40,7 +40,7 @@ This proposal points out workflow details of volume reclaim policies.
 
 ### Implementation Details
 
-LVM-LocalPV doesn't have any direct dependency over volume reclaim policies moreover
+LocalPV-LVM doesn't have any direct dependency over volume reclaim policies moreover
 these are is a standard Kubernetes storageclass option. Kubernetes supports two kind
 of volume policies that are `Retain` & `Delete`. By the name `Retain` states underlying
 volume should exist even after deleting PVC whereas `Delete` states underlying volume

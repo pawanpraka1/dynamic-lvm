@@ -1,5 +1,5 @@
 ---
-title: Snapshot Support for LVM-LocalPV
+title: Snapshot Support for LocalPV-LVM
 authors:
   - "@pawanpraka1"
 owners:
@@ -9,7 +9,7 @@ last-updated: 2021-06-21
 status: In Progress
 ---
 
-# Snapshot Support for LVM-LocalPV
+# Snapshot Support for LocalPV-LVM
 
 ## Table of Contents
 

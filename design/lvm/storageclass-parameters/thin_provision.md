@@ -1,5 +1,5 @@
 ---
-title: LVM-LocalPV Thin Provision
+title: LocalPV-LVM Thin Provision
 authors:
   - "@pawanpraka1"
 owners:
@@ -9,10 +9,10 @@ last-updated: 2021-06-16
 status: Implemented
 ---
 
-# LVM-LocalPV Thin Provisioning
+# LocalPV-LVM Thin Provisioning
 
 ## Table of Contents
-- [LVM-LocalPV Thin Provisioning](#lvm-localpv-thin-provisioning)
+- [LocalPV-LVM Thin Provisioning](#lvm-localpv-thin-provisioning)
   - [Table of Contents](#table-of-contents)
   - [Summary](#summary)
   - [Motivation](#motivation)

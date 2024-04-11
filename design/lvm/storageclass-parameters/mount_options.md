@@ -1,5 +1,5 @@
 ---
-title: LVM-LocalPV Mount Options
+title: LocalPV-LVM Mount Options
 authors:
   - "@pawanpraka1"
 owners:
@@ -9,10 +9,10 @@ last-updated: 2021-06-16
 status: Implemented
 ---
 
-# LVM-LocalPV Mount Options
+# LocalPV-LVM Mount Options
 
 ## Table of Contents
-- [LVM-LocalPV Mount Options](#lvm-localpv-mount-options)
+- [LocalPV-LVM Mount Options](#lvm-localpv-mount-options)
   - [Table of Contents](#table-of-contents)
   - [Summary](#summary)
   - [Motivation](#motivation)

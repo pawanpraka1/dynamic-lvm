@@ -41,11 +41,11 @@ This proposal points out workflow details to support volume binding modes.
 
 ### Implementation Details
 
-LVM-LocalPV doesn't have any direct dependency over volumebinding modes moreover these are
+LocalPV-LVM doesn't have any direct dependency over volumebinding modes moreover these are
 standard Kubernetes storageclass option. For more information about workflow is
 available [here](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/storage/volume-topology-scheduling.md#delayed-volume-binding).
 
-LVM-LocalPV honours both types of VolumeBindingModes `Immediate` & `WaitForFirstConsumer`.
+LocalPV-LVM honours both types of VolumeBindingModes `Immediate` & `WaitForFirstConsumer`.
 - Configuring `Immediate` informs Kubernetes volume provisioning should be instantiated
   right after creation of PersistentVolumeClaim(PVC).
 - Configuring `WaitForFirstConsumer` inform Kubernetes volume provisioning should be

@@ -147,7 +147,7 @@ parameters:
 
 ### MountOptions (Optional)
 
-Volumes that are provisioned via LVM-LocalPV will use the mount options specified in storageclass during volume mounting time inside an application. If a field is unspecified/specified, `-o default` option will be added to mount the volume. For more information about mount options workflow click [here](../design/lvm/storageclass-parameters/mount_options.md).
+Volumes that are provisioned via LocalPV-LVM will use the mount options specified in storageclass during volume mounting time inside an application. If a field is unspecified/specified, `-o default` option will be added to mount the volume. For more information about mount options workflow click [here](../design/lvm/storageclass-parameters/mount_options.md).
 
 **Note**: Mount options are not validated. If mount options are invalid, then volume mount fails.
 ```yaml
@@ -165,11 +165,11 @@ parameters:
 
 ### Parameters
 
-LVM-LocalPV storageclass supports various parameters for different use cases. Following are the supported parameters
+LocalPV-LVM storageclass supports various parameters for different use cases. Following are the supported parameters
 
 - #### FsType (Optional)
 
-  Admin can specify filesystem in storageclass. LVM-LocalPV CSI-Driver will format block device with specified filesystem and mount in application pod. If fsType is not specified defaults to `ext4` filesystem. For more information about filesystem type workflow click [here](../design/lvm/storageclass-parameters/fs_type.md).
+  Admin can specify filesystem in storageclass. LocalPV-LVM CSI-Driver will format block device with specified filesystem and mount in application pod. If fsType is not specified defaults to `ext4` filesystem. For more information about filesystem type workflow click [here](../design/lvm/storageclass-parameters/fs_type.md).
   ```yaml
   apiVersion: storage.k8s.io/v1
   kind: StorageClass
@@ -321,7 +321,7 @@ allowedTopologies:
      - node-2
 ```
 
-At the same time, you must set env variables in the LVM-LocalPV CSI driver daemon sets (openebs-lvm-node) so that it can pick the node label as the supported topology. It add "openebs.io/nodename" as default topology key. If the key doesn't exist in the node labels when the CSI LVM driver register, the key will not add to the topologyKeys. Set more than one keys separated by commas.
+At the same time, you must set env variables in the LocalPV-LVM CSI driver daemon sets (openebs-lvm-node) so that it can pick the node label as the supported topology. It add "openebs.io/nodename" as default topology key. If the key doesn't exist in the node labels when the CSI LVM driver register, the key will not add to the topologyKeys. Set more than one keys separated by commas.
 
 ```yaml
 env:
@@ -374,7 +374,7 @@ $ kubectl edit ds -n openebs openebs-lvm-node
 
 Here we can have volume group of name “lvmvg” created on the nvme disks and want to use this high performing LVM volume group for the applications that need higher IOPS. We can use the above SorageClass to create the PVC and deploy the application using that.
 
-The LVM-LocalPV driver will create the Volume in the volume group “lvmvg” present on the node with fewer of volumes provisioned among the given node list. In the above StorageClass, if there provisioned volumes on node-1 are less, it will create the volume on node-1 only. Alternatively, we can use `volumeBindingMode: WaitForFirstConsumer` to let the k8s select the node where the volume should be provisioned.
+The LocalPV-LVM driver will create the Volume in the volume group “lvmvg” present on the node with fewer of volumes provisioned among the given node list. In the above StorageClass, if there provisioned volumes on node-1 are less, it will create the volume on node-1 only. Alternatively, we can use `volumeBindingMode: WaitForFirstConsumer` to let the k8s select the node where the volume should be provisioned.
 
 The problem with the above StorageClass is that it works fine if the number of nodes is less, but if the number of nodes is huge, it is cumbersome to list all the nodes like this. In that case, what we can do is, we can label all the similar nodes using the same key value and use that label to create the StorageClass.
 
@@ -385,7 +385,7 @@ user@k8s-master:~ $ kubectl label node k8s-node-1 openebs.io/lvmvg=nvme
 node/k8s-node-1 labeled
 ```
 
-Add "openebs.io/lvmvg" to the LVM-LocalPV CSI driver daemon sets env(ALLOWED_TOPOLOGIES). Now, we can create the StorageClass like this:
+Add "openebs.io/lvmvg" to the LocalPV-LVM CSI driver daemon sets env(ALLOWED_TOPOLOGIES). Now, we can create the StorageClass like this:
 
 ```yaml
 apiVersion: storage.k8s.io/v1

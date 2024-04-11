@@ -1,5 +1,5 @@
 ---
-title: LVM-LocalPV fsType
+title: LocalPV-LVM fsType
 authors:
   - "@pawanpraka1"
 owners:
@@ -9,10 +9,10 @@ last-updated: 2021-06-17
 status: Implemented
 ---
 
-# LVM-LocalPV fsType Parameter
+# LocalPV-LVM fsType Parameter
 
 ## Table of Contents
-- [LVM-LocalPV fsType Parameter](#lvm-localpv-fstype-parameter)
+- [LocalPV-LVM fsType Parameter](#lvm-localpv-fstype-parameter)
   - [Table of Contents](#table-of-contents)
   - [Summary](#summary)
   - [Motivation](#motivation)
@@ -50,7 +50,7 @@ Kubernetes provides a placeholder in StorageClasss to specify driver & Storage P
 supported key-value pairs under the parameters section. K8s registered a key called `fsType`
 to specify filesystem.
 
-- Filesystem information is propagated to LVM-LocalPV CSI Driver during as payload during
+- Filesystem information is propagated to LocalPV-LVM CSI Driver during as payload during
   `NodePublishVolume` gRPC request.
 - During `NodePublishVolume` gRPC request CSI driver reads required information(fsType,
   volume mode, mount options, and so on) if volume mode is filesystem then driver will

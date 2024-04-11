@@ -1,4 +1,4 @@
-## LVM-LocalPV Volume Resize
+## LocalPV-LVM Volume Resize
 
 We can resize the volume by updating the PVC yaml to the desired size and apply it. The LVM Driver will take care of expanding the volume via lvextend command using "-r" option which will resize the filesystem.
 
