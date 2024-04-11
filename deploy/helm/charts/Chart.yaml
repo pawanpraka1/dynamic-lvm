@@ -16,5 +16,5 @@ sources:
 - https://github.com/openebs/lvm-localpv
 dependencies:
   - name: crds
-    version: "1.5.1"
+    version: 1.5.1
     condition: crds.enabled
