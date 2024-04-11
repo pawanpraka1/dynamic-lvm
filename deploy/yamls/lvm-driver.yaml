@@ -1191,7 +1191,7 @@ spec:
       labels:
         app: openebs-lvm-node
         role: openebs-lvm
-        openebs.io/component-name: openebs-lvm-node
+        openebs.io/component-name: openebs-lvm-localpv-node
         openebs.io/version: ci
     spec:
       priorityClassName: openebs-lvm-localpv-csi-node-critical

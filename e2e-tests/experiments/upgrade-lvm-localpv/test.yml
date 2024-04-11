@@ -141,7 +141,7 @@
 
         - name: Verify that lvm-node agent daemonset image is upgraded
           shell: >
-            kubectl get ds openebs-lvm-node -n kube-system 
+            kubectl get ds openebs-lvm-localpv-node -n kube-system 
             -o jsonpath='{.spec.template.spec.containers[?(@.name=="openebs-lvm-plugin")].image}'
           args: 
             executable: /bin/bash

@@ -175,7 +175,7 @@
           failed_when: "pvc_status.stdout != 'Pending'"
 
         - name: Set the ALLOWED_TOPOLOGIES env in lvm node-daemonset with test-specific topology key
-          shell: kubectl set env daemonset/openebs-lvm-node -n kube-system ALLOWED_TOPOLOGIES=kubernetes.io/hostname,{{ lkey }}
+          shell: kubectl set env daemonset/openebs-lvm-localpv-node -n kube-system ALLOWED_TOPOLOGIES=kubernetes.io/hostname,{{ lkey }}
           args: 
             executable: /bin/bash
           register: topology_status

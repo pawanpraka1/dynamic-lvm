@@ -321,7 +321,7 @@ allowedTopologies:
      - node-2
 ```
 
-At the same time, you must set env variables in the LocalPV-LVM CSI driver daemon sets (openebs-lvm-node) so that it can pick the node label as the supported topology. It add "openebs.io/nodename" as default topology key. If the key doesn't exist in the node labels when the CSI LVM driver register, the key will not add to the topologyKeys. Set more than one keys separated by commas.
+At the same time, you must set env variables in the LocalPV-LVM CSI driver daemon sets (openebs-lvm-localpv-node) so that it can pick the node label as the supported topology. It add "openebs.io/nodename" as default topology key. If the key doesn't exist in the node labels when the CSI LVM driver register, the key will not add to the topologyKeys. Set more than one keys separated by commas.
 
 ```yaml
 env:
@@ -369,7 +369,7 @@ spec:
 If you want to change topology keys, just set new env(ALLOWED_TOPOLOGIES) .Check [faq](./faq.md#1-how-to-add-custom-topology-key) for more details.
 
 ```
-$ kubectl edit ds -n openebs openebs-lvm-node
+$ kubectl edit ds -n openebs openebs-lvm-localpv-node
 ```
 
 Here we can have volume group of name “lvmvg” created on the nvme disks and want to use this high performing LVM volume group for the applications that need higher IOPS. We can use the above SorageClass to create the PVC and deploy the application using that.

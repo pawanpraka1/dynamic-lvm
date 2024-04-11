@@ -2,7 +2,7 @@
 
 To add custom topology key:
 * Label the nodes with the required key and value.
-* Set env variables in the LVM driver daemonset yaml(openebs-lvm-node), if already deployed, you can edit the daemonSet directly.
+* Set env variables in the LVM driver daemonset yaml(openebs-lvm-localpv-node), if already deployed, you can edit the daemonSet directly.
 * "openebs.io/nodename" has been added as default topology key. 
 * Create storageclass with above specific labels keys.
 
@@ -16,7 +16,7 @@ NAME           STATUS   ROLES    AGE   VERSION   LABELS
 k8s-node-1   Ready    worker   16d   v1.17.4   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=k8s-node-1,kubernetes.io/os=linux,node-role.kubernetes.io/worker=true,openebs.io/rack=rack1
 
 
-$ kubectl get ds -n openebs openebs-lvm-node -o yaml
+$ kubectl get ds -n openebs openebs-lvm-localpv-node -o yaml
 ...
 env:
   - name: OPENEBS_NODE_ID
@@ -35,7 +35,7 @@ env:
 ```
 It is recommended is to label all the nodes with the same key, they can have different values for the given keys, but all keys should be present on all the worker node.
 
-Once we have labeled the node, we can install the lvm driver. The driver will pick the keys from env "ALLOWED_TOPOLOGIES" and add that as the supported topology key. If the driver is already installed and you want to add a new topology information, you can edit the LocalPV-LVM CSI driver daemon sets (openebs-lvm-node).
+Once we have labeled the node, we can install the lvm driver. The driver will pick the keys from env "ALLOWED_TOPOLOGIES" and add that as the supported topology key. If the driver is already installed and you want to add a new topology information, you can edit the LocalPV-LVM CSI driver daemon sets (openebs-lvm-localpv-node).
 
 
 ```sh
@@ -43,9 +43,9 @@ $ kubectl get pods -n openebs -l role=openebs-lvm
 
 NAME                       READY   STATUS    RESTARTS   AGE
 openebs-lvm-controller-0   4/4     Running   0          5h28m
-openebs-lvm-node-4d94n     2/2     Running   0          5h28m
-openebs-lvm-node-gssh8     2/2     Running   0          5h28m
-openebs-lvm-node-twmx8     2/2     Running   0          5h28m
+openebs-lvm-localpv-node-4d94n     2/2     Running   0          5h28m
+openebs-lvm-localpv-node-gssh8     2/2     Running   0          5h28m
+openebs-lvm-localpv-node-twmx8     2/2     Running   0          5h28m
 ```
 
 We can verify that key has been registered successfully with the LVM LocalPV CSI Driver by checking the CSI node object yaml :-
