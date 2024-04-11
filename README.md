@@ -38,7 +38,7 @@ Please review this roadmp and feel free to pass back any feedback on it, as well
 
 
 ## Project info
-The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects/30). This tracks our base historical engineering development work and is now somewhat out of date. We will be publish an updated 2024 Unified Roadmp soon, as ZFS-LoalPV is now being integrated and unified into the core OpenEBS storage platform.<BR>
+The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects/30). This tracks our base historical engineering development work and is now somewhat out of date. We will be publish an updated 2024 Unified Roadmp soon, as LVM-LocalPV is now being integrated and unified into the core OpenEBS storage platform.<BR>
 
 <BR>
 
@@ -51,7 +51,7 @@ The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects
 > Before installing the LVM-LocalPV driver please make sure your Kubernetes Cluster meets the following prerequisites:
 > 1. All the nodes must have LVM2 utils package installed
 > 2. All the nodes must have dm-snapshot Kernel Module loaded - (Device Mapper Snapshot)
-> 4. You have access to install RBAC components into kube-system namespace. The OpenEBS LVM driver components are installed in kube-system namespace to allow them to be flagged as system critical components.
+> 4. You have access to install RBAC components into <OPENEBS> namespace.
 <BR>
 
 > [!NOTE]
@@ -64,7 +64,7 @@ The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects
 
 > | Name | Version |
 > | :--- | :--- |
-> | K8S | 1.20+ |
+> | K8S | 1.23+ |
 > | Distro | Alpine, Arch, CentOS, Debian, Fedora, NixOS, SUSE, Talos, RHEL, Ubuntu |
 > | Kernel | oldest supported kernel is 2.6 |
 > | LVM2 | 2.03.21 |
@@ -100,43 +100,31 @@ sudo vgcreate lvmvg /dev/loop0       ## here lvmvg is the volume group name to b
 
 Install the latest release of OpenEBS LVM2 LVM-LocalPV driver by running the following command. Note: All nodes must be running the same verison of LVM-LocalPV, LMV2, device-mapper & dm-snapshot.
 
-```
-$ kubectl apply -f https://openebs.github.io/charts/lvm-operator.yaml
-```
-
-If you want to fetch a versioned manifest, you can use the manifests for a
-specific OpenEBS release version, for example:
-
-```
-$ kubectl apply -f https://raw.githubusercontent.com/openebs/charts/gh-pages/versioned/3.0.0/lvm-operator.yaml
+**NOTE:** Installation using operator YAMLs is not the supported way any longer.  
+We can install the latest release of OpenEBS LVM driver by running the following command:
+```bash
+helm repo add openebs https://openebs.github.io/openebs
+helm repo update
+helm install openebs --namespace openebs openebs/openebs --create-namespace
 ```
 
-**NOTE:** For some Kubernetes distributions, the `kubelet` directory must be changed at all relevant places in the YAML powering the operator (both the `openebs-lvm-controller` and `openebs-lvm-node`).
+**NOTE:** If you are running a custom Kubelet location, or a Kubernetes distribution that uses a custom Kubelet location, the `kubelet` directory must be changed on the helm values at install-time using the flag option `--set lvm-localpv.lvmNode.kubeletDir=<your-directory-path>` in the `helm install` command.
 
-- For `microk8s`, we need to change the kubelet directory to `/var/snap/microk8s/common/var/lib/kubelet/`, we need to replace `/var/lib/kubelet/` with `/var/snap/microk8s/common/var/lib/kubelet/` at all the places in the operator yaml and then we can apply it on microk8s.
-
+- For `microk8s`, we need to change the kubelet directory to `/var/snap/microk8s/common/var/lib/kubelet/`, we need to replace `/var/lib/kubelet/` with `/var/snap/microk8s/common/var/lib/kubelet/`.
 - For `k0s`, the default directory (`/var/lib/kubelet`) should be changed to `/var/lib/k0s/kubelet`.
-
 - For `RancherOS`, the default directory (`/var/lib/kubelet`) should be changed to `/opt/rke/var/lib/kubelet`.
 
-Verify that the LVM driver Components are installed and running using below command :
-
+Verify that the LVM driver Components are installed and running using below command. Depending on number of nodes, you will see one lvm-controller pod and lvm-node daemonset running on the nodes :
+```bash
+$ kubectl get pods -n openebs -l role=openebs-lvm
+NAME                                              READY   STATUS    RESTARTS   AGE
+openebs-lvm-localpv-controller-7b6d6b4665-fk78q   5/5     Running   0          11m
+openebs-lvm-localpv-node-mcch4                    2/2     Running   0          11m
+openebs-lvm-localpv-node-pdt88                    2/2     Running   0          11m
+openebs-lvm-localpv-node-r9jn2                    2/2     Running   0          11m
 ```
-$ kubectl get pods -n kube-system -l role=openebs-lvm
-```
 
-Depending on number of nodes, you will see one lvm-controller pod and lvm-node daemonset running
-on the nodes.
-
-```
-NAME                       READY   STATUS    RESTARTS   AGE
-openebs-lvm-controller-0   5/5     Running   0          35s
-openebs-lvm-node-54slv     2/2     Running   0          35s
-openebs-lvm-node-9vg28     2/2     Running   0          35s
-openebs-lvm-node-qbv57     2/2     Running   0          35s
-
-```
-Once LVM driver is successfully installed, we can provision volumes.
+Once LVM driver is installed and running we can provision a volume.
 
 ### Deployment
 
