@@ -51,14 +51,14 @@ The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects
 > Before installing the LocalPV-LVM driver please make sure your Kubernetes Cluster meets the following prerequisites:
 > 1. All the nodes must have LVM2 utils package installed
 > 2. All the nodes must have dm-snapshot Kernel Module loaded - (Device Mapper Snapshot)
-> 4. You have access to install RBAC components into <OPENEBS> namespace.
+> 4. You have access to install RBAC components into `<OPENEBS>` namespace.
 <BR>
 
-> [!NOTE]
+<!-- > [!NOTE]
 > - Full LVM2 dynamic provisioning is now supported <BR>
 > - All Volume Groups (VG), Physical Volumes (PV) and Logical Volumes (LV) willbe dynamically provisionsed for you by OpenEBS <BR>
 > - There is need  to manually provison any PV, VG or LV's  <BR>
-> - Dynamic RAID provisioning is still in development. RAID LV's must be deployed via the manual pre configuiration method <BR>
+> - Dynamic RAID provisioning is still in development. RAID LV's must be deployed via the manual pre configuiration method <BR> -->
 
 ### Supported System
 
