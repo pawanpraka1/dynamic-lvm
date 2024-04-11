@@ -16,12 +16,11 @@
 
 set -e
 
-LVM_OPERATOR="$(realpath deploy/lvm-operator.yaml)"
+LVM_CHART=deploy/helm/charts
 SNAP_CLASS="$(realpath deploy/sample/lvmsnapclass.yaml)"
+export OPENEBS_NAMESPACE="openebs"
 
-export LVM_NAMESPACE="openebs"
 export TEST_DIR="tests"
-export NAMESPACE="kube-system"
 
 # allow override
 if [ -z "${KUBECONFIG}" ]
@@ -70,7 +69,7 @@ cleanup() {
 
   kubectl delete pvc -n openebs lvmpv-pvc
   kubectl delete -f "${SNAP_CLASS}"
-  kubectl delete -f "${LVM_OPERATOR}"
+  helm uninstall openebs-lvmlocalpv -n "$OPENEBS_NAMESPACE"
 
   # always return true
   return 0
@@ -99,29 +98,29 @@ sudo modprobe dm_thin_pool
 
 # Prepare env for running BDD tests
 # Minikube is already running
-kubectl apply -f "${LVM_OPERATOR}"
+helm install openebs-lvmlocalpv "$LVM_CHART" -n "$OPENEBS_NAMESPACE" --create-namespace --dependency-update --set analytics.enabled=false
 kubectl apply -f "${SNAP_CLASS}"
 
 dumpAgentLogs() {
   NR=$1
-  AgentPOD=$(kubectl get pods -l app=openebs-lvm-node -o jsonpath='{.items[0].metadata.name}' -n "$NAMESPACE")
-  kubectl describe po "$AgentPOD" -n "$NAMESPACE"
+  AgentPOD=$(kubectl get pods -l app=openebs-lvm-node -o jsonpath='{.items[0].metadata.name}' -n "$OPENEBS_NAMESPACE")
+  kubectl describe po "$AgentPOD" -n "$OPENEBS_NAMESPACE"
   printf "\n\n"
-  kubectl logs --tail="${NR}" "$AgentPOD" -n "$NAMESPACE" -c openebs-lvm-plugin
+  kubectl logs --tail="${NR}" "$AgentPOD" -n "$OPENEBS_NAMESPACE" -c openebs-lvm-plugin
   printf "\n\n"
 }
 
 dumpControllerLogs() {
   NR=$1
-  ControllerPOD=$(kubectl get pods -l app=openebs-lvm-controller -o jsonpath='{.items[0].metadata.name}' -n "$NAMESPACE")
-  kubectl describe po "$ControllerPOD" -n "$NAMESPACE"
+  ControllerPOD=$(kubectl get pods -l app=openebs-lvm-controller -o jsonpath='{.items[0].metadata.name}' -n "$OPENEBS_NAMESPACE")
+  kubectl describe po "$ControllerPOD" -n "$OPENEBS_NAMESPACE"
   printf "\n\n"
-  kubectl logs --tail="${NR}" "$ControllerPOD" -n "$NAMESPACE" -c openebs-lvm-plugin
+  kubectl logs --tail="${NR}" "$ControllerPOD" -n "$OPENEBS_NAMESPACE" -c openebs-lvm-plugin
   printf "\n\n"
 }
 
 isPodReady(){
-  [ "$(kubectl get po "$1" -o 'jsonpath={.status.conditions[?(@.type=="Ready")].status}' -n "$NAMESPACE")" = 'True' ]
+  [ "$(kubectl get po "$1" -o 'jsonpath={.status.conditions[?(@.type=="Ready")].status}' -n "$OPENEBS_NAMESPACE")" = 'True' ]
 }
 
 isDriverReady(){
@@ -136,7 +135,7 @@ waitForLVMDriver() {
 
   i=0
   while [ "$i" -le "$period" ]; do
-    lvmDriver="$(kubectl get pods -l role=openebs-lvm -o 'jsonpath={.items[*].metadata.name}' -n "$NAMESPACE")"
+    lvmDriver="$(kubectl get pods -l role=openebs-lvm -o 'jsonpath={.items[*].metadata.name}' -n "$OPENEBS_NAMESPACE")"
     if isDriverReady "$lvmDriver"; then
       return 0
     fi
@@ -155,7 +154,7 @@ waitForLVMDriver
 
 cd $TEST_DIR
 
-kubectl get po -n "$NAMESPACE"
+kubectl get po -n "$OPENEBS_NAMESPACE"
 
 set +e
 
@@ -186,10 +185,10 @@ echo "get sc details"
 kubectl get sc --all-namespaces -oyaml
 
 echo "get lvm volume details"
-kubectl get lvmvolumes.local.openebs.io -n openebs -oyaml
+kubectl get lvmvolumes.local.openebs.io -n "$OPENEBS_NAMESPACE" -oyaml
 
 echo "get lvm snapshot details"
-kubectl get lvmsnapshots.local.openebs.io -n openebs -oyaml
+kubectl get lvmsnapshots.local.openebs.io -n "$OPENEBS_NAMESPACE" -oyaml
 
 exit 1
 fi

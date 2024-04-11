@@ -15,9 +15,9 @@ labels: Bug
 **The output of the following commands will help us better understand what's going on**:
 (Pasting long output into a [GitHub gist](https://gist.github.com) or other [Pastebin](https://pastebin.com/) is fine.)
 
-* `kubectl logs -f openebs-lvm-controller-0 -n kube-system -c openebs-lvm-plugin`
-* `kubectl logs -f openebs-lvm-node-[xxxx] -n kube-system -c openebs-lvm-plugin`
-* `kubectl get pods -n kube-system`
+* `kubectl logs -f openebs-lvm-localpv-controller-7b6d6b4665-fk78q -n openebs -c openebs-lvm-plugin`
+* `kubectl logs -f openebs-lvm-node-[xxxx] -n openebs -c openebs-lvm-plugin`
+* `kubectl get pods -n openebs`
 * `kubectl get lvmvol -A -o yaml`
 
 **Anything else you would like to add:**
