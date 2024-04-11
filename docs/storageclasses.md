@@ -369,7 +369,7 @@ spec:
 If you want to change topology keys, just set new env(ALLOWED_TOPOLOGIES) .Check [faq](./faq.md#1-how-to-add-custom-topology-key) for more details.
 
 ```
-$ kubectl edit ds -n kube-system openebs-lvm-node
+$ kubectl edit ds -n openebs openebs-lvm-node
 ```
 
 Here we can have volume group of name “lvmvg” created on the nvme disks and want to use this high performing LVM volume group for the applications that need higher IOPS. We can use the above SorageClass to create the PVC and deploy the application using that.

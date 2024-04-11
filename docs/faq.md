@@ -16,7 +16,7 @@ NAME           STATUS   ROLES    AGE   VERSION   LABELS
 k8s-node-1   Ready    worker   16d   v1.17.4   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=k8s-node-1,kubernetes.io/os=linux,node-role.kubernetes.io/worker=true,openebs.io/rack=rack1
 
 
-$ kubectl get ds -n kube-system openebs-lvm-node -o yaml
+$ kubectl get ds -n openebs openebs-lvm-node -o yaml
 ...
 env:
   - name: OPENEBS_NODE_ID
@@ -39,7 +39,7 @@ Once we have labeled the node, we can install the lvm driver. The driver will pi
 
 
 ```sh
-$ kubectl get pods -n kube-system -l role=openebs-lvm
+$ kubectl get pods -n openebs -l role=openebs-lvm
 
 NAME                       READY   STATUS    RESTARTS   AGE
 openebs-lvm-controller-0   4/4     Running   0          5h28m
