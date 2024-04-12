@@ -103,10 +103,11 @@ Install the latest release of OpenEBS LVM2 LocalPV-LVM driver by running the fol
 **NOTE:** Installation using operator YAMLs is not the supported way any longer.  
 We can install the latest release of OpenEBS LVM driver by running the following command:
 ```bash
-helm repo add openebs https://openebs.github.io/openebs
+helm repo add openebs https://openebs.github.io/charts
 helm repo update
-helm install openebs --namespace openebs openebs/openebs --create-namespace
+helm install openebs --namespace openebs openebs/openebs --create-namespace --set lvm-localpv.enabled=true
 ```
+Include `--version x.y.z` to install a specific OpenEBS version.
 
 **NOTE:** If you are running a custom Kubelet location, or a Kubernetes distribution that uses a custom Kubelet location, the `kubelet` directory must be changed on the helm values at install-time using the flag option `--set lvm-localpv.lvmNode.kubeletDir=<your-directory-path>` in the `helm install` command.
 
