@@ -136,3 +136,10 @@ Create the name of the priority class for csi controller plugin
 {{- printf "%s" .Values.lvmController.priorityClass.name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
+
+{{/*
+Ensure that the path to kubelet ends with a slash
+*/}}
+{{- define "lvmlocalpv.lvmNode.kubeletDir" -}}
+{{- printf "%s/" (.Values.lvmNode.kubeletDir | trimSuffix "/") -}}
+{{- end }}
