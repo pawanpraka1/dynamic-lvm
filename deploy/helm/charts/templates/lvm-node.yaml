@@ -47,7 +47,7 @@ spec:
             - name: ADDRESS
               value: /plugin/csi.sock
             - name: DRIVER_REG_SOCK_PATH
-              value: {{ .Values.lvmNode.kubeletDir }}plugins/lvm-localpv/csi.sock
+              value: {{ printf "%s%s" (include "lvmlocalpv.lvmNode.kubeletDir" .) "plugins/lvm-localpv/csi.sock" | quote }}
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -117,7 +117,7 @@ spec:
             - name: device-dir
               mountPath: /dev
             - name: pods-mount-dir
-              mountPath: {{ .Values.lvmNode.kubeletDir }}
+              mountPath: {{ include "lvmlocalpv.lvmNode.kubeletDir" . | quote }}
               # needed so that any mounts setup inside this container are
               # propagated back to the host machine.
               mountPropagation: "Bidirectional"
@@ -130,15 +130,15 @@ spec:
             type: Directory
         - name: registration-dir
           hostPath:
-            path: {{ .Values.lvmNode.kubeletDir }}plugins_registry/
+            path: {{ printf "%s%s" (include "lvmlocalpv.lvmNode.kubeletDir" .) "plugins_registry/" | quote }}
             type: DirectoryOrCreate
         - name: plugin-dir
           hostPath:
-            path: {{ .Values.lvmNode.kubeletDir }}plugins/lvm-localpv/
+            path: {{ printf "%s%s" (include "lvmlocalpv.lvmNode.kubeletDir" .) "plugins/lvm-localpv/" | quote }}
             type: DirectoryOrCreate
         - name: pods-mount-dir
           hostPath:
-            path: {{ .Values.lvmNode.kubeletDir }}
+            path: {{ include "lvmlocalpv.lvmNode.kubeletDir" . | quote }}
             type: Directory
 {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
