@@ -60,9 +60,9 @@ var (
 	LocalProvisioner = "local.csi.openebs.io"
 	pvcName          = "lvmpv-pvc"
 	snapName         = "lvmpv-snap"
-	appName          = "busybox-lvmpv"
+	appName          = "fio-ci"
 
-	nodeDaemonSet         = "openebs-lvm-node"
+	nodeDaemonSet        = "openebs-lvm-node"
 	controllerDeployment = "openebs-lvm-controller"
 
 	nsObj            *corev1.Namespace
