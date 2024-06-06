@@ -22,6 +22,7 @@ import (
 	"strconv"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog/v2"
 
 	"github.com/openebs/lvm-localpv/pkg/builder/nodebuilder"
 	"github.com/openebs/lvm-localpv/pkg/builder/volbuilder"
@@ -112,21 +113,29 @@ func getSpaceWeightedMap(re *regexp.Regexp) (map[string]int64, error) {
 	}
 
 	for _, node := range nodeList.Items {
+		klog.Info("space weight: node picked: %s", node.Name)
 		var maxFree int64 = 0
 		for _, vg := range node.VolumeGroups {
+			klog.Info("space weight: vg picked: %s", vg.Name)
 			if re.MatchString(vg.Name) {
+				klog.Info("space weight: vg matched with pattern: %s", vg.Name)
 				freeCapacity := vg.Free.Value()
+				klog.Info("free capacity %d\n", freeCapacity)
+				klog.Info("max free till now %d\n", maxFree)
 				if maxFree < freeCapacity {
 					maxFree = freeCapacity
 				}
+				klog.Info("maxfree on node %s, vg %s is %d\n", node.Name, vg.Name, maxFree)
 			}
 		}
 		if maxFree > 0 {
 			// converting to SpaceWeighted by subtracting it with MaxInt64
 			// as the node which has max free space available is less loaded.
 			nmap[node.Name] = math.MaxInt64 - maxFree
+			klog.Info("nmap info for node: %s is %d", node.Name, nmap[node.Name])
 		}
 	}
+	klog.Info("nmap is:", nmap)
 
 	return nmap, nil
 }

@@ -297,6 +297,7 @@ func CreateLVMVolume(ctx context.Context, req *csi.CreateVolumeRequest,
 			}
 		}
 	}
+	klog.Info("vgpattern is %s", params.VgPattern)
 
 	nmap, err := getNodeMap(params.Scheduler, params.VgPattern)
 	if err != nil {
