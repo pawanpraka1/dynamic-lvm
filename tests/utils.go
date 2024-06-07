@@ -320,43 +320,44 @@ func createDeployVerifyApp() {
 
 func createAndDeployAppPod(appname string) {
 	var err error
-	ginkgo.By("building a busybox app pod deployment using above lvm volume")
+	ginkgo.By("building a fio app pod deployment using above lvm volume")
 	deployObj, err = deploy.NewBuilder().
 		WithName(appname).
 		WithNamespace(OpenEBSNamespace).
 		WithLabelsNew(
 			map[string]string{
-				"app": "busybox",
+				"app": "fio-ci",
 			},
 		).
 		WithSelectorMatchLabelsNew(
 			map[string]string{
-				"app": "busybox",
+				"app": "fio-ci",
 			},
 		).
 		WithPodTemplateSpecBuilder(
 			pts.NewBuilder().
 				WithLabelsNew(
 					map[string]string{
-						"app": "busybox",
+						"app": "fio-ci",
 					},
 				).
 				WithContainerBuilders(
 					container.NewBuilder().
-						WithImage("busybox").
-						WithName("busybox").
+						WithImage("xridge/fio").
+						WithName("fio").
 						WithImagePullPolicy(corev1.PullIfNotPresent).
 						WithCommandNew(
 							[]string{
 								"sh",
 								"-c",
-								"date > /mnt/datadir/date.txt; sync; sleep 5; sync; tail -f /dev/null;",
+								"fio --filename=/mnt/datadir/fioFile --direct=1 --rw=write --bs=4k --ioengine=linuxaio --iodepth=32 --size=3GiB --numjobs=1 --name=fio-ci",
 							},
 						).
 						WithVolumeMountsNew(
 							[]corev1.VolumeMount{
 								corev1.VolumeMount{
-									Name:      "datavol1",
+									Name: "datavol1",
+									// If this path changes, modify the above fio command line accordingly.
 									MountPath: "/mnt/datadir",
 								},
 							},
@@ -383,43 +384,44 @@ func createAndDeployAppPod(appname string) {
 
 func createAndDeployBlockAppPod() {
 	var err error
-	ginkgo.By("building a busybox app pod deployment using above lvm volume")
+	ginkgo.By("building a fio app pod deployment using above lvm volume")
 	deployObj, err = deploy.NewBuilder().
 		WithName(appName).
 		WithNamespace(OpenEBSNamespace).
 		WithLabelsNew(
 			map[string]string{
-				"app": "busybox",
+				"app": "fio-ci",
 			},
 		).
 		WithSelectorMatchLabelsNew(
 			map[string]string{
-				"app": "busybox",
+				"app": "fio-ci",
 			},
 		).
 		WithPodTemplateSpecBuilder(
 			pts.NewBuilder().
 				WithLabelsNew(
 					map[string]string{
-						"app": "busybox",
+						"app": "fio-ci",
 					},
 				).
 				WithContainerBuilders(
 					container.NewBuilder().
-						WithImage("busybox").
-						WithName("busybox").
+						WithImage("xridge/fio").
+						WithName("fio").
 						WithImagePullPolicy(corev1.PullIfNotPresent).
 						WithCommandNew(
 							[]string{
 								"sh",
 								"-c",
-								"date > /mnt/datadir/date.txt; sync; sleep 5; sync; tail -f /dev/null;",
+								"fio --filename=/dev/xvda/fioFile --direct=1 --rw=write --bs=4k --ioengine=linuxaio --iodepth=32 --size=3GiB --numjobs=1 --name=fio-ci",
 							},
 						).
 						WithVolumeDevicesNew(
 							[]corev1.VolumeDevice{
 								corev1.VolumeDevice{
-									Name:       "datavol1",
+									Name: "datavol1",
+									// If this path changes, modify the above fio command line accordingly.
 									DevicePath: "/dev/xvda",
 								},
 							},
@@ -454,7 +456,7 @@ func verifyAppPodRunning() {
 	var err error
 	appPod, err = PodClient.WithNamespace(OpenEBSNamespace).
 		List(metav1.ListOptions{
-			LabelSelector: "app=busybox",
+			LabelSelector: "app=fio-ci",
 		},
 		)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "while verifying application pod")
