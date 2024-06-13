@@ -69,6 +69,7 @@ func IsPVCResizedEventually(pvcName string, newCapacity string, shouldPass bool)
 			Get(pvcName, metav1.GetOptions{})
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		pvcStorage := volume.Status.Capacity[corev1.ResourceName(corev1.ResourceStorage)]
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		return pvcStorage == newStorage
 	},
 		120, 5).
@@ -135,6 +136,7 @@ func createStorageClass() {
 	ginkgo.By("building a default storage class")
 	scObj, err = sc.NewBuilder().
 		WithGenerateName(scName).
+		WithVolumeExpansion(true).
 		WithParametersNew(parameters).
 		WithProvisioner(LocalProvisioner).Build()
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(),
@@ -158,6 +160,7 @@ func createThinStorageClass() {
 	scObj, err = sc.NewBuilder().
 		WithGenerateName(scName).
 		WithParametersNew(parameters).
+		WithVolumeExpansion(true).
 		WithProvisioner(LocalProvisioner).Build()
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(),
 		"while building thinProvision storageclass obj with prefix {%s}", scName)
@@ -177,8 +180,11 @@ func VerifyLVMVolume() {
 	gomega.Expect(vol.Spec.VolGroup).To(gomega.Equal(scObj.Parameters["volgroup"]),
 		"while checking volume group of lvm volume", pvcObj.Spec.VolumeName)
 
+	gomega.Expect(vol.Status.State).To(gomega.Equal("Ready"),
+		"While checking if lvmvolume: %s is in Ready state", pvcObj.Spec.VolumeName)
 	gomega.Expect(vol.Finalizers[0]).To(gomega.Equal(lvm.LVMFinalizer), "while checking finializer to be set {%s}", pvcObj.Spec.VolumeName)
 }
+
 
 func deleteStorageClass() {
 	err := SCClient.Delete(scObj.Name, &metav1.DeleteOptions{})
