@@ -37,6 +37,18 @@ spec:
 `
 )
 
+const (
+	sizedsnapYAML = `apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: #snapname
+spec:
+  volumeSnapshotClassName: lvmpv-snapclass-sized
+  source:
+    persistentVolumeClaimName: #pvcname
+`
+)
+
 func execAtLocal(cmd string, input []byte, args ...string) ([]byte, []byte, error) {
 	var stdout, stderr bytes.Buffer
 	command := exec.Command(cmd, args...)
@@ -68,17 +80,17 @@ func verifySnapshotCreated(snapName string) bool {
 	return true
 }
 
-func createSnapshot(pvcName, snapName string) {
+func createSnapshot(pvcName, snapName string, snapYaml string) {
 	By("creating snapshot for a pvc " + pvcName)
 
-	tyaml := strings.Replace(snapYAML, "#pvcname", pvcName, -1)
+	tyaml := strings.Replace(snapYaml, "#pvcname", pvcName, -1)
 	yaml := strings.Replace(tyaml, "#snapname", snapName, -1)
 
 	stdout, stderr, err := kubectlWithInput([]byte(yaml), "apply", "-n", OpenEBSNamespace, "-f", "-")
 	Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 }
 
-func deleteSnapshot(pvcName, snapName string) {
+func deleteSnapshot(pvcName, snapName string, snapYaml string) {
 	By("deleting the snapshot " + snapName)
 
 	tyaml := strings.Replace(snapYAML, "#pvcname", pvcName, -1)
