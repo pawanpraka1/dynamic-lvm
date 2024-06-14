@@ -6,3 +6,14 @@ metadata:
     snapshot.storage.kubernetes.io/is-default-class: "true"
 driver: local.csi.openebs.io
 deletionPolicy: Delete
+---
+kind: VolumeSnapshotClass
+apiVersion: snapshot.storage.k8s.io/v1
+metadata:
+  name: lvmpv-snapclass-sized
+  annotations:
+    snapshot.storage.kubernetes.io/is-default-class: "false"
+driver: local.csi.openebs.io
+deletionPolicy: Delete
+parameters:
+  snapSize: 80%
