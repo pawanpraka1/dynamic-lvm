@@ -81,14 +81,14 @@ cleanup() {
 
 # setup the lvm volume group to create the volume
 cleanup_lvmvg
-truncate -s 1024G /tmp/openebs_ci_disk.img
+truncate -s 100G /tmp/openebs_ci_disk.img
 disk="$(sudo losetup -f /tmp/openebs_ci_disk.img --show)"
 sudo pvcreate "${disk}"
 sudo vgcreate lvmvg "${disk}"
 
 # setup a foreign lvm to test
 cleanup_foreign_lvmvg
-truncate -s 1024G /tmp/openebs_ci_foreign_disk.img
+truncate -s 100G /tmp/openebs_ci_foreign_disk.img
 foreign_disk="$(sudo losetup -f /tmp/openebs_ci_foreign_disk.img --show)"
 sudo pvcreate "${foreign_disk}"
 sudo vgcreate foreign_lvmvg "${foreign_disk}" --config="${FOREIGN_LVM_CONFIG}"
@@ -96,6 +96,10 @@ sudo vgcreate foreign_lvmvg "${foreign_disk}" --config="${FOREIGN_LVM_CONFIG}"
 # install snapshot and thin volume module for lvm
 sudo modprobe dm-snapshot
 sudo modprobe dm_thin_pool
+
+# Set the configuration for thin pool autoextend in lvm.conf
+sudo sed -i '/^[^#]*thin_pool_autoextend_threshold/ s/= .*/= 50/' /etc/lvm/lvm.conf
+sudo sed -i '/^[^#]*thin_pool_autoextend_percent/ s/= .*/= 20/' /etc/lvm/lvm.conf
 
 # Prepare env for running BDD tests
 # Minikube is already running

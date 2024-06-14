@@ -65,15 +65,16 @@ var (
 	nodeDaemonSet        = "openebs-lvm-node"
 	controllerDeployment = "openebs-lvm-controller"
 
-	nsObj            *corev1.Namespace
-	scObj            *storagev1.StorageClass
-	deployObj        *appsv1.Deployment
-	pvcObj           *corev1.PersistentVolumeClaim
-	appPod           *corev1.PodList
-	accessModes      = []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce}
-	capacity         = "5368709120" // 5Gi
-	KubeConfigPath   string
-	OpenEBSNamespace string
+	nsObj             *corev1.Namespace
+	scObj             *storagev1.StorageClass
+	deployObj         *appsv1.Deployment
+	pvcObj            *corev1.PersistentVolumeClaim
+	appPod            *corev1.PodList
+	accessModes       = []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce}
+	capacity          = "5368709120" // 5Gi
+	expanded_capacity = "6442450944" // 6Gi
+	KubeConfigPath    string
+	OpenEBSNamespace  string
 )
 
 func init() {

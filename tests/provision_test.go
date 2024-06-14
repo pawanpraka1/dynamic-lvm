@@ -94,6 +94,20 @@ func thinVolCreationTest() {
 	By("Deleting thinProvision storage class", deleteStorageClass)
 }
 
+func thinVolCapacityTest() {
+	By("Creating thinProvision storage class", createThinStorageClass)
+	By("creating and verifying PVC bound status", createAndVerifyPVC)
+	By("enabling monitoring on thinpool", enableThinpoolMonitoring)
+	By("Creating and deploying app pod", createDeployVerifyApp)
+	By("verifying thinpool auto-extended", VerifyThinpoolExtend)
+	By("verifying LVMVolume object", VerifyLVMVolume)
+	By("Deleting application deployment")
+	deleteAppDeployment(appName)
+	By("Deleting pvc")
+	deleteAndVerifyPVC(pvcName)
+	By("Deleting thinProvision storage class", deleteStorageClass)
+}
+
 func leakProtectionTest() {
 	By("Creating default storage class", createStorageClass)
 	ds := deleteNodeDaemonSet() // ensure that provisioning remains in pending state.
@@ -116,8 +130,9 @@ func leakProtectionTest() {
 }
 
 func volumeCreationTest() {
-	By("Running volume creation test", fsVolCreationTest)
+	By("Running filesystem volume creation test", fsVolCreationTest)
 	By("Running block volume creation test", blockVolCreationTest)
 	By("Running thin volume creation test", thinVolCreationTest)
+	By("Running thin volume capacity test", thinVolCapacityTest)
 	By("Running leak protection test", leakProtectionTest)
 }
