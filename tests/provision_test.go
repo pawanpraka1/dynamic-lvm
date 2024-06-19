@@ -30,9 +30,11 @@ var _ = Describe("[lvmpv] TEST VOLUME PROVISIONING", func() {
 	})
 })
 
-func deleteAppAndPvc(appname string, pvcname string) {
-	By("Deleting the application deployment")
-	deleteAppDeployment(appName)
+func deleteAppAndPvc(appnames []string, pvcname string) {
+	for _, appName := range appnames {
+		By("Deleting the application deployment " + appName)
+		deleteAppDeployment(appName)
+	}
 	By("Deleting the PVC")
 	deleteAndVerifyPVC(pvcName)
 }
@@ -56,7 +58,7 @@ func fsVolCreationTest() {
 			resizeAndVerifyPVC(false, "10Gi")
 		}
 
-		deleteAppAndPvc(appName, pvcName)
+		deleteAppAndPvc(appNames, pvcName)
 
 		// PV should be present after PVC deletion since snapshot is present
 		By("Verifying that PV exists after PVC deletion")
@@ -81,7 +83,7 @@ func blockVolCreationTest() {
 	createSnapshot(pvcName, snapName, snapYAML)
 	By("verify snapshot")
 	verifySnapshotCreated(snapName)
-	deleteAppAndPvc(appName, pvcName)
+	deleteAppAndPvc(appNames, pvcName)
 	By("Verifying that PV exists after PVC deletion")
 	verifyPVForPVC(true, pvcName)
 	By("Deleting snapshot")
@@ -89,6 +91,21 @@ func blockVolCreationTest() {
 	By("Verifying that PV is deleted after snapshot deletion")
 	verifyPVForPVC(false, pvcName)
 	By("Deleting storage class", deleteStorageClass)
+}
+
+func sharedVolumeTest() {
+	By("Creating shared LV storage class", createSharedVolStorageClass)
+	By("creating and verifying PVC bound status", createAndVerifyPVC)
+	//we use two fio app pods for this test.
+	appNames = append(appNames, "fio-ci-1")
+	By("Creating and deploying app pod", createDeployVerifyApp)
+	By("verifying LVMVolume object", VerifyLVMVolume)
+	By("Online resizing the shared volume")
+	resizeAndVerifyPVC(true, "8Gi")
+	deleteAppAndPvc(appNames, pvcName)
+	By("Deleting storage class", deleteStorageClass)
+	// Reset the app list back to original
+	appNames = appNames[:len(appNames)-1]
 }
 
 func thinVolCreationTest() {
@@ -102,7 +119,7 @@ func thinVolCreationTest() {
 	createSnapshot(pvcName, snapName, snapYAML)
 	By("verify snapshot")
 	verifySnapshotCreated(snapName)
-	deleteAppAndPvc(appName, pvcName)
+	deleteAppAndPvc(appNames, pvcName)
 	By("Verifying that PV exists after PVC deletion")
 	verifyPVForPVC(true, pvcName)
 	By("Deleting snapshot")
@@ -119,7 +136,7 @@ func thinVolCapacityTest() {
 	By("Creating and deploying app pod", createDeployVerifyApp)
 	By("verifying thinpool auto-extended", VerifyThinpoolExtend)
 	By("verifying LVMVolume object", VerifyLVMVolume)
-	deleteAppAndPvc(appName, pvcName)
+	deleteAppAndPvc(appNames, pvcName)
 	By("Deleting thinProvision storage class", deleteStorageClass)
 }
 
@@ -130,7 +147,7 @@ func sizedSnapFSTest() {
 	By("verifying LVMVolume object", VerifyLVMVolume)
 	createSnapshot(pvcName, snapName, sizedsnapYAML)
 	verifySnapshotCreated(snapName)
-	deleteAppAndPvc(appName, pvcName)
+	deleteAppAndPvc(appNames, pvcName)
 	deleteSnapshot(pvcName, snapName, sizedsnapYAML)
 	By("Deleting storage class", deleteStorageClass)
 }
@@ -142,7 +159,7 @@ func sizedSnapBlockTest() {
 	By("verifying LVMVolume object", VerifyLVMVolume)
 	createSnapshot(pvcName, snapName, sizedsnapYAML)
 	verifySnapshotCreated(snapName)
-	deleteAppAndPvc(appName, pvcName)
+	deleteAppAndPvc(appNames, pvcName)
 	deleteSnapshot(pvcName, snapName, sizedsnapYAML)
 	By("Deleting storage class", deleteStorageClass)
 }
@@ -178,6 +195,7 @@ func volumeCreationTest() {
 	By("Running block volume creation test", blockVolCreationTest)
 	By("Running thin volume creation test", thinVolCreationTest)
 	By("Running leak protection test", leakProtectionTest)
+	By("Running shared volume for two app pods on same node test", sharedVolumeTest)
 }
 
 func capacityTest() {

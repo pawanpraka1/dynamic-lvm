@@ -148,6 +148,29 @@ func createStorageClass() {
 	gomega.Expect(err).To(gomega.BeNil(), "while creating a default storageclass {%s}", scName)
 }
 
+func createSharedVolStorageClass() {
+	var (
+		err error
+	)
+
+	parameters := map[string]string{
+		"volgroup": VOLGROUP,
+		"shared":   "yes",
+	}
+
+	ginkgo.By("building a shared volume storage class")
+	scObj, err = sc.NewBuilder().
+		WithGenerateName(scName).
+		WithVolumeExpansion(true).
+		WithParametersNew(parameters).
+		WithProvisioner(LocalProvisioner).Build()
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(),
+		"while building shared volume storageclass obj with prefix {%s}", scName)
+
+	scObj, err = SCClient.Create(scObj)
+	gomega.Expect(err).To(gomega.BeNil(), "while creating a shared volume storageclass {%s}", scName)
+}
+
 func createThinStorageClass() {
 	var (
 		err error
@@ -186,7 +209,6 @@ func VerifyLVMVolume() {
 		"While checking if lvmvolume: %s is in Ready state", pvcObj.Spec.VolumeName)
 	gomega.Expect(vol.Finalizers[0]).To(gomega.Equal(lvm.LVMFinalizer), "while checking finializer to be set {%s}", pvcObj.Spec.VolumeName)
 }
-
 
 func deleteStorageClass() {
 	err := SCClient.Delete(scObj.Name, &metav1.DeleteOptions{})
@@ -321,137 +343,146 @@ func resizeAndVerifyPVC(shouldPass bool, size string) {
 }
 func createDeployVerifyApp() {
 	ginkgo.By("creating and deploying app pod")
-	createAndDeployAppPod(appName)
+	createAndDeployAppPod(appNames)
 	time.Sleep(30 * time.Second)
-	ginkgo.By("verifying app pod is running", verifyAppPodRunning)
+	ginkgo.By("verifying app pods are running", verifyAppPodRunning)
 }
 
-func createAndDeployAppPod(appname string) {
+func createAndDeployAppPod(appnames []string) {
 	var err error
-	ginkgo.By("building a fio app pod deployment using above lvm volume")
-	deployObj, err = deploy.NewBuilder().
-		WithName(appname).
-		WithNamespace(OpenEBSNamespace).
-		WithLabelsNew(
-			map[string]string{
-				"app": "fio-ci",
-			},
-		).
-		WithSelectorMatchLabelsNew(
-			map[string]string{
-				"app": "fio-ci",
-			},
-		).
-		WithPodTemplateSpecBuilder(
-			pts.NewBuilder().
-				WithLabelsNew(
-					map[string]string{
-						"app": "fio-ci",
-					},
-				).
-				WithContainerBuilders(
-					container.NewBuilder().
-						WithImage("xridge/fio").
-						WithName("fio").
-						WithImagePullPolicy(corev1.PullIfNotPresent).
-						WithCommandNew(
-							[]string{
-								"sh",
-								"-c",
-								"fio --filename=/mnt/datadir/fioFile --direct=1 --rw=write --bs=4k --ioengine=linuxaio --iodepth=32 --size=3GiB --numjobs=1 --name=fio-ci",
-							},
-						).
-						WithVolumeMountsNew(
-							[]corev1.VolumeMount{
-								corev1.VolumeMount{
-									Name: "datavol1",
-									// If this path changes, modify the above fio command line accordingly.
-									MountPath: "/mnt/datadir",
+	rwmode := "write"
+	for index, appname := range appnames {
+		// only one app should do the write to ensure data safety.
+		if index > 0 {
+			rwmode = "read"
+		}
+		ginkgo.By("building app " + appname + " " + rwmode + " mode pod deployment using above lvm volume")
+		deployObj, err = deploy.NewBuilder().
+			WithName(appname).
+			WithNamespace(OpenEBSNamespace).
+			WithLabelsNew(
+				map[string]string{
+					"app": appname,
+				},
+			).
+			WithSelectorMatchLabelsNew(
+				map[string]string{
+					"app": appname,
+				},
+			).
+			WithPodTemplateSpecBuilder(
+				pts.NewBuilder().
+					WithLabelsNew(
+						map[string]string{
+							"app": appname,
+						},
+					).
+					WithContainerBuilders(
+						container.NewBuilder().
+							WithImage("xridge/fio").
+							WithName("fio").
+							WithImagePullPolicy(corev1.PullIfNotPresent).
+							WithCommandNew(
+								[]string{
+									"sh",
+									"-c",
+									"fio --filename=/mnt/datadir/fioFile --direct=1 --rw=" + rwmode + " --bs=4k --ioengine=linuxaio --iodepth=32 --size=3GiB --numjobs=1 --name=fio-ci",
 								},
-							},
-						),
-				).
-				WithVolumeBuilders(
-					k8svolume.NewBuilder().
-						WithName("datavol1").
-						WithPVCSource(pvcObj.Name),
-				),
-		).
-		Build()
+							).
+							WithVolumeMountsNew(
+								[]corev1.VolumeMount{
+									corev1.VolumeMount{
+										Name: "datavol1",
+										// If this path changes, modify the above fio command line accordingly.
+										MountPath: "/mnt/datadir",
+									},
+								},
+							),
+					).
+					WithVolumeBuilders(
+						k8svolume.NewBuilder().
+							WithName("datavol1").
+							WithPVCSource(pvcObj.Name),
+					),
+			).
+			Build()
 
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "while building app deployement {%s}", appName)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "while building app deployement {%s}", appname)
 
-	deployObj, err = DeployClient.WithNamespace(OpenEBSNamespace).Create(deployObj)
-	gomega.Expect(err).ShouldNot(
-		gomega.HaveOccurred(),
-		"while creating pod {%s} in namespace {%s}",
-		appName,
-		OpenEBSNamespace,
-	)
+		deployObj, err = DeployClient.WithNamespace(OpenEBSNamespace).Create(deployObj)
+		gomega.Expect(err).ShouldNot(
+			gomega.HaveOccurred(),
+			"while creating pod {%s} in namespace {%s}",
+			appname,
+			OpenEBSNamespace,
+		)
+	}
 }
 
 func createAndDeployBlockAppPod() {
 	var err error
-	ginkgo.By("building a fio app pod deployment using above lvm volume")
-	deployObj, err = deploy.NewBuilder().
-		WithName(appName).
-		WithNamespace(OpenEBSNamespace).
-		WithLabelsNew(
-			map[string]string{
-				"app": "fio-ci",
-			},
-		).
-		WithSelectorMatchLabelsNew(
-			map[string]string{
-				"app": "fio-ci",
-			},
-		).
-		WithPodTemplateSpecBuilder(
-			pts.NewBuilder().
-				WithLabelsNew(
-					map[string]string{
-						"app": "fio-ci",
-					},
-				).
-				WithContainerBuilders(
-					container.NewBuilder().
-						WithImage("xridge/fio").
-						WithName("fio").
-						WithImagePullPolicy(corev1.PullIfNotPresent).
-						WithCommandNew(
-							[]string{
-								"sh",
-								"-c",
-								"fio --filename=/dev/xvda/fioFile --direct=1 --rw=write --bs=4k --ioengine=linuxaio --iodepth=32 --size=3GiB --numjobs=1 --name=fio-ci",
-							},
-						).
-						WithVolumeDevicesNew(
-							[]corev1.VolumeDevice{
-								corev1.VolumeDevice{
-									Name: "datavol1",
-									// If this path changes, modify the above fio command line accordingly.
-									DevicePath: "/dev/xvda",
+	for _, appName := range appNames {
+		ginkgo.By("building app " + appName + " pod deployment using above lvm volume")
+		deployObj, err = deploy.NewBuilder().
+			WithName(appName).
+			WithNamespace(OpenEBSNamespace).
+			WithLabelsNew(
+				map[string]string{
+					"app": appName,
+				},
+			).
+			WithSelectorMatchLabelsNew(
+				map[string]string{
+					"app": appName,
+				},
+			).
+			WithPodTemplateSpecBuilder(
+				pts.NewBuilder().
+					WithLabelsNew(
+						map[string]string{
+							"app": appName,
+						},
+					).
+					WithContainerBuilders(
+						container.NewBuilder().
+							WithImage("xridge/fio").
+							WithName("fio").
+							WithImagePullPolicy(corev1.PullIfNotPresent).
+							WithCommandNew(
+								[]string{
+									"sh",
+									"-c",
+									"fio --filename=/dev/xvda/fioFile --direct=1 --rw=write --bs=4k --ioengine=linuxaio --iodepth=32 --size=3GiB --numjobs=1 --name=fio-ci",
 								},
-							},
-						),
-				).
-				WithVolumeBuilders(
-					k8svolume.NewBuilder().
-						WithName("datavol1").
-						WithPVCSource(pvcObj.Name),
-				),
-		).
-		Build()
+							).
+							WithVolumeDevicesNew(
+								[]corev1.VolumeDevice{
+									corev1.VolumeDevice{
+										Name: "datavol1",
+										// If this path changes, modify the above fio command line accordingly.
+										DevicePath: "/dev/xvda",
+									},
+								},
+							),
+					).
+					WithVolumeBuilders(
+						k8svolume.NewBuilder().
+							WithName("datavol1").
+							WithPVCSource(pvcObj.Name),
+					),
+			).
+			Build()
 
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "while building app deployement {%s}", appName)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "while building app deployement {%s}", appName)
 
-	deployObj, err = DeployClient.WithNamespace(OpenEBSNamespace).Create(deployObj)
-	gomega.Expect(err).ShouldNot(
-		gomega.HaveOccurred(),
-		"while creating pod {%s} in namespace {%s}",
-		appName,
-		OpenEBSNamespace,
-	)
+		deployObj, err = DeployClient.WithNamespace(OpenEBSNamespace).Create(deployObj)
+		gomega.Expect(err).ShouldNot(
+			gomega.HaveOccurred(),
+			"while creating pod {%s} in namespace {%s}",
+			appName,
+			OpenEBSNamespace,
+		)
+	}
 }
 
 func createDeployVerifyBlockApp() {
@@ -462,15 +493,18 @@ func createDeployVerifyBlockApp() {
 
 func verifyAppPodRunning() {
 	var err error
-	appPod, err = PodClient.WithNamespace(OpenEBSNamespace).
-		List(metav1.ListOptions{
-			LabelSelector: "app=fio-ci",
-		},
-		)
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "while verifying application pod")
+	for _, appName := range appNames {
+		labelValue := fmt.Sprintf("app=%s", appName)
+		appPod, err = PodClient.WithNamespace(OpenEBSNamespace).
+			List(metav1.ListOptions{
+				LabelSelector: labelValue,
+			},
+			)
+		gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "while verifying application pod")
 
-	status := IsPodRunningEventually(OpenEBSNamespace, appPod.Items[0].Name)
-	gomega.Expect(status).To(gomega.Equal(true), "while checking status of pod {%s}", appPod.Items[0].Name)
+		status := IsPodRunningEventually(OpenEBSNamespace, appPod.Items[0].Name)
+		gomega.Expect(status).To(gomega.Equal(true), "while checking status of pod {%s}", appPod.Items[0].Name)
+	}
 }
 
 func deleteAppDeployment(appname string) {
