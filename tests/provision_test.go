@@ -190,12 +190,26 @@ func leakProtectionTest() {
 	By("Deleting storage class", deleteStorageClass)
 }
 
+// This acts as a test just to call the new wrapper functions,
+// Once we write tests calling them this will not be required.
+// This doesnt test any Openebs component.
+func lvmOps() {
+	device := createPV(6)
+	createVg("newvgcode3", device)
+	device_1 := createPV(5)
+	extendVg("newvgcode3", device_1)
+	removeVg("newvgcode3")
+	removePV(device)
+	removePV(device_1)
+}
+
 func volumeCreationTest() {
 	By("Running filesystem volume creation test", fsVolCreationTest)
 	By("Running block volume creation test", blockVolCreationTest)
 	By("Running thin volume creation test", thinVolCreationTest)
 	By("Running leak protection test", leakProtectionTest)
 	By("Running shared volume for two app pods on same node test", sharedVolumeTest)
+	By("Running Lvm Ops", lvmOps)
 }
 
 func capacityTest() {
