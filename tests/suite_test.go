@@ -60,7 +60,8 @@ var (
 	LocalProvisioner = "local.csi.openebs.io"
 	pvcName          = "lvmpv-pvc"
 	snapName         = "lvmpv-snap"
-	appName          = "fio-ci"
+	// default one fio app for most tests.
+	appNames = []string{"fio-ci-0"}
 
 	nodeDaemonSet        = "openebs-lvm-node"
 	controllerDeployment = "openebs-lvm-controller"
