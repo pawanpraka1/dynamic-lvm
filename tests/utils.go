@@ -19,8 +19,6 @@ package tests
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/onsi/ginkgo"
@@ -747,70 +745,4 @@ func createNodeDaemonSet(ds *appsv1.DaemonSet) {
 	gomega.Expect(err).To(
 		gomega.BeNil(),
 		"creating node plugin daemonset %v", nodeDaemonSet)
-}
-
-// enable the monitoring on thinpool created for test, on local node which
-// is part of single node cluster.
-func enableThinpoolMonitoring() {
-	lv := VOLGROUP + "/" + pvcObj.Spec.VolumeName
-
-	args := []string{
-		"lvdisplay", "--columns",
-		"--options", "pool_lv",
-		"--noheadings",
-		lv,
-	}
-	stdout, _, err := execAtLocal("sudo", nil, args...)
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "display LV")
-	gomega.Expect(strings.TrimSpace(string(stdout))).To(gomega.Not(gomega.Equal("")), "get thinpool LV")
-
-	thinpool := VOLGROUP + "/" + strings.TrimSpace(string(stdout))
-
-	args = []string{
-		"lvchange",
-		"--monitor", "y",
-		thinpool,
-	}
-
-	_, _, err = execAtLocal("sudo", nil, args...)
-	gomega.Expect(err).To(gomega.BeNil(), "run lvchange command")
-}
-
-// verify that the thinpool has extended in capacity to an expected size.
-func VerifyThinpoolExtend() {
-	expect_size, _ := strconv.ParseInt(expanded_capacity, 10, 64)
-	lv := VOLGROUP + "/" + pvcObj.Spec.VolumeName
-
-	args := []string{
-		"lvdisplay", "--columns",
-		"--options", "pool_lv",
-		"--noheadings",
-		lv,
-	}
-
-	//stdout will contain the pool name
-	stdout, _, err := execAtLocal("sudo", nil, args...)
-	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "display LV")
-	gomega.Expect(strings.TrimSpace(string(stdout))).To(gomega.Not(gomega.Equal("")), "get thinpool LV")
-
-	thinpool := VOLGROUP + "/" + strings.TrimSpace(string(stdout))
-
-	args = []string{
-		"lvdisplay", "--columns",
-		"--options", "lv_size",
-		"--units", "b",
-		"--noheadings",
-		thinpool,
-	}
-
-	// stdout will contain the size
-	stdout, _, err = execAtLocal("sudo", nil, args...)
-	gomega.Expect(err).To(gomega.BeNil(), "display thinpool LV")
-
-	// Remove unit suffix from the size.
-	size_str := strings.TrimSuffix(strings.TrimSpace(string(stdout)), "B")
-	// This expectation is a factor of the lvm.conf settings we do from ci-test.sh
-	// and the original volume size.
-	size_int64, _ := strconv.ParseInt(size_str, 10, 64)
-	gomega.Expect(size_int64).To(gomega.Equal(expect_size))
 }
