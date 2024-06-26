@@ -26,6 +26,7 @@ import (
 var _ = Describe("[lvmpv] TEST VOLUME PROVISIONING", func() {
 	Context("App is deployed with lvm driver", func() {
 		It("Running volume Creation Tests", volumeCreationTest)
+		It("Running scheduling Tests", schedulingTest)
 		It("Running volume/snapshot Capacity Tests", capacityTest)
 	})
 })
@@ -39,14 +40,27 @@ func deleteAppAndPvc(appnames []string, pvcname string) {
 	deleteAndVerifyPVC(pvcName)
 }
 
+func setupVg(size int, name string) string {
+	device := createPV(size)
+	createVg(name, device)
+	return device
+}
+
+func cleanupVg(device string, name string) {
+	removeVg(name)
+	removePV(device)
+}
+
 func fsVolCreationTest() {
 	fstypes := []string{"ext4", "xfs", "btrfs"}
 	for _, fstype := range fstypes {
 		By("####### Creating the storage class : " + fstype + " #######")
 		createFstypeStorageClass(fstype)
-		By("creating and verifying PVC bound status", createAndVerifyPVC)
+		By("Creating and verifying PVC bound status")
+		createAndVerifyPVC(true)
 		By("Creating and deploying app pod", createDeployVerifyApp)
-		By("verifying LVMVolume object", VerifyLVMVolume)
+		By("Verifying LVMVolume object to be Ready")
+		VerifyLVMVolume(true, "")
 
 		resizeAndVerifyPVC(true, "8Gi")
 		// do not resize after creating the snapshot(not supported)
@@ -74,14 +88,16 @@ func fsVolCreationTest() {
 
 func blockVolCreationTest() {
 	By("Creating default storage class", createStorageClass)
-	By("creating and verifying PVC bound status", createAndVerifyBlockPVC)
+	By("Creating and verifying PVC bound status")
+	createAndVerifyBlockPVC(true)
 	By("Creating and deploying app pod", createDeployVerifyBlockApp)
-	By("verifying LVMVolume object", VerifyLVMVolume)
+	By("Verifying LVMVolume object to be Ready")
+	VerifyLVMVolume(true, "")
 	By("Online resizing the block volume")
 	resizeAndVerifyPVC(true, "8Gi")
-	By("create snapshot")
+	By("Creating snapshot")
 	createSnapshot(pvcName, snapName, snapYAML)
-	By("verify snapshot")
+	By("Verifying snapshot")
 	verifySnapshotCreated(snapName)
 	deleteAppAndPvc(appNames, pvcName)
 	By("Verifying that PV exists after PVC deletion")
@@ -93,16 +109,91 @@ func blockVolCreationTest() {
 	By("Deleting storage class", deleteStorageClass)
 }
 
+func vgExtendNeededForProvsioningTest() {
+	device_0 := setupVg(7, "lvmvgdiff")
+	device := setupVg(3, "lvmvg")
+	device_1 := createPV(4)
+	defer removePV(device_1)
+	defer cleanupVg(device_0, "lvmvgdiff")
+	defer cleanupVg(device, "lvmvg")
+	By("Creating default storage class", createStorageClass)
+	By("Creating and verifying PVC Not Bound status")
+	createAndVerifyPVC(false)
+	By("Verifying LVMVolume object to be not Ready")
+	VerifyLVMVolume(false, "")
+	extendVg("lvmvg", device_1)
+	By("Verifying PVC bound status after vg extend")
+	VerifyBlockPVC()
+	By("Verifying LVMVolume object to be Ready after vg extend")
+	VerifyLVMVolume(true, "")
+	By("Deleting pvc")
+	deleteAndVerifyPVC(pvcName)
+	By("Verifying that PV doesnt exists after PVC deletion")
+	verifyPVForPVC(false, pvcName)
+	By("Deleting storage class", deleteStorageClass)
+}
+
+func vgPatternMatchPresentTest() {
+	device := setupVg(20, "lvmvg112")
+	device_1 := setupVg(20, "lvmvg")
+	defer cleanupVg(device_1, "lvmvg")
+	defer cleanupVg(device, "lvmvg112")
+	By("Creating custom storage class with non existing vg parameter", createVgPatternStorageClass)
+	By("Creating and verifying PVC Bound status")
+	createAndVerifyPVC(true)
+	By("Verifying LVMVolume object to be Ready")
+	VerifyLVMVolume(true, "lvmvg112")
+	deleteAndVerifyPVC(pvcName)
+	By("Verifying that PV doesnt exists after PVC deletion")
+	verifyPVForPVC(false, pvcName)
+	By("Deleting storage class", deleteStorageClass)
+}
+
+func vgPatternNoMatchPresentTest() {
+	device := setupVg(20, "lvmvg212")
+	device_1 := setupVg(20, "lvmvg")
+	defer cleanupVg(device_1, "lvmvg")
+	defer cleanupVg(device, "lvmvg212")
+	By("Creating custom storage class with non existing vg parameter", createVgPatternStorageClass)
+	By("Creating and verifying PVC Not Bound status")
+	createAndVerifyPVC(false)
+	By("Verifying LVMVolume object to be Not Ready")
+	VerifyLVMVolume(false, "")
+	deleteAndVerifyPVC(pvcName)
+	By("Verifying that PV doesnt exists after PVC deletion")
+	verifyPVForPVC(false, pvcName)
+	By("Deleting storage class", deleteStorageClass)
+}
+
+func vgSpecifiedNotPresentTest() {
+	device := setupVg(40, "lvmvg")
+	defer cleanupVg(device, "lvmvg")
+	By("Creating custom storage class with non existing vg parameter", createStorageClassWithNonExistingVg)
+	By("creating and verifying PVC Not Bound status")
+	createAndVerifyPVC(false)
+	By("Verifying LVMVolume object to be Not Ready")
+	VerifyLVMVolume(false, "")
+	By("Deleting pvc")
+	deleteAndVerifyPVC(pvcName)
+	By("Verifying that PV doesnt exists after PVC deletion")
+	verifyPVForPVC(false, pvcName)
+	By("Deleting storage class", deleteStorageClass)
+}
+
 func sharedVolumeTest() {
 	By("Creating shared LV storage class", createSharedVolStorageClass)
-	By("creating and verifying PVC bound status", createAndVerifyPVC)
+	By("creating and verifying PVC bound status")
+	createAndVerifyPVC(true)
 	//we use two fio app pods for this test.
 	appNames = append(appNames, "fio-ci-1")
 	By("Creating and deploying app pod", createDeployVerifyApp)
-	By("verifying LVMVolume object", VerifyLVMVolume)
+	By("Verifying LVMVolume object to be Not Ready")
+	VerifyLVMVolume(true, "")
 	By("Online resizing the shared volume")
 	resizeAndVerifyPVC(true, "8Gi")
 	deleteAppAndPvc(appNames, pvcName)
+	By("Verifying that PV doesnt exists after PVC deletion")
+	verifyPVForPVC(false, pvcName)
 	By("Deleting storage class", deleteStorageClass)
 	// Reset the app list back to original
 	appNames = appNames[:len(appNames)-1]
@@ -110,9 +201,11 @@ func sharedVolumeTest() {
 
 func thinVolCreationTest() {
 	By("Creating thinProvision storage class", createThinStorageClass)
-	By("creating and verifying PVC bound status", createAndVerifyPVC)
+	By("creating and verifying PVC bound status")
+	createAndVerifyPVC(true)
 	By("Creating and deploying app pod", createDeployVerifyApp)
-	By("verifying LVMVolume object", VerifyLVMVolume)
+	By("verifying LVMVolume object")
+	VerifyLVMVolume(true, "")
 	By("Online resizing the block volume")
 	resizeAndVerifyPVC(true, "8Gi")
 	By("create snapshot")
@@ -131,36 +224,52 @@ func thinVolCreationTest() {
 
 func thinVolCapacityTest() {
 	By("Creating thinProvision storage class", createThinStorageClass)
-	By("creating and verifying PVC bound status", createAndVerifyPVC)
+	By("creating and verifying PVC bound status")
+	createAndVerifyPVC(true)
 	By("enabling monitoring on thinpool", enableThinpoolMonitoring)
 	By("Creating and deploying app pod", createDeployVerifyApp)
 	By("verifying thinpool auto-extended", VerifyThinpoolExtend)
-	By("verifying LVMVolume object", VerifyLVMVolume)
+	By("verifying LVMVolume object")
+	VerifyLVMVolume(true, "")
 	deleteAppAndPvc(appNames, pvcName)
+	By("Verifying that PV doesnt exists after PVC deletion")
+	verifyPVForPVC(false, pvcName)
 	By("Deleting thinProvision storage class", deleteStorageClass)
 }
 
 func sizedSnapFSTest() {
 	createFstypeStorageClass("ext4")
-	By("creating and verifying PVC bound status", createAndVerifyPVC)
+	By("creating and verifying PVC bound status")
+	createAndVerifyPVC(true)
 	By("Creating and deploying app pod", createDeployVerifyApp)
-	By("verifying LVMVolume object", VerifyLVMVolume)
+	By("verifying LVMVolume object")
+	VerifyLVMVolume(true, "")
 	createSnapshot(pvcName, snapName, sizedsnapYAML)
 	verifySnapshotCreated(snapName)
 	deleteAppAndPvc(appNames, pvcName)
+	By("Verifying that PV exists before Snapshot deletion")
+	verifyPVForPVC(true, pvcName)
 	deleteSnapshot(pvcName, snapName, sizedsnapYAML)
+	By("Verifying that PV doesnt exists after Snapshot deletion")
+	verifyPVForPVC(false, pvcName)
 	By("Deleting storage class", deleteStorageClass)
 }
 
 func sizedSnapBlockTest() {
 	By("Creating default storage class", createStorageClass)
-	By("creating and verifying PVC bound status", createAndVerifyPVC)
+	By("creating and verifying PVC bound status")
+	createAndVerifyPVC(true)
 	By("Creating and deploying app pod", createDeployVerifyApp)
-	By("verifying LVMVolume object", VerifyLVMVolume)
+	By("verifying LVMVolume object")
+	VerifyLVMVolume(true, "")
 	createSnapshot(pvcName, snapName, sizedsnapYAML)
 	verifySnapshotCreated(snapName)
 	deleteAppAndPvc(appNames, pvcName)
+	By("Verifying that PV exists before Snapshot deletion")
+	verifyPVForPVC(true, pvcName)
 	deleteSnapshot(pvcName, snapName, sizedsnapYAML)
+	By("Verifying that PV doesnt exists after Snapshot deletion")
+	verifyPVForPVC(false, pvcName)
 	By("Deleting storage class", deleteStorageClass)
 }
 
@@ -190,29 +299,26 @@ func leakProtectionTest() {
 	By("Deleting storage class", deleteStorageClass)
 }
 
-// This acts as a test just to call the new wrapper functions,
-// Once we write tests calling them this will not be required.
-// This doesnt test any Openebs component.
-func lvmOps() {
-	device := createPV(6)
-	createVg("newvgcode3", device)
-	device_1 := createPV(5)
-	extendVg("newvgcode3", device_1)
-	removeVg("newvgcode3")
-	removePV(device)
-	removePV(device_1)
+func volumeCreationTest() {
+	device := setupVg(40, "lvmvg")
+	defer cleanupVg(device, "lvmvg")
+	By("###Running filesystem volume creation test###", fsVolCreationTest)
+	By("###Running block volume creation test###", blockVolCreationTest)
+	By("###Running thin volume creation test###", thinVolCreationTest)
+	By("###Running leak protection test###", leakProtectionTest)
+	By("###Running shared volume for two app pods on same node test###", sharedVolumeTest)
 }
 
-func volumeCreationTest() {
-	By("Running filesystem volume creation test", fsVolCreationTest)
-	By("Running block volume creation test", blockVolCreationTest)
-	By("Running thin volume creation test", thinVolCreationTest)
-	By("Running leak protection test", leakProtectionTest)
-	By("Running shared volume for two app pods on same node test", sharedVolumeTest)
-	By("Running Lvm Ops", lvmOps)
+func schedulingTest() {
+	By("###Running vg extend needed to provision test###", vgExtendNeededForProvsioningTest)
+	By("###Running vg specified in sc not present test###", vgSpecifiedNotPresentTest)
+	By("###Running lvmnode has vg matching vgpattern test###", vgPatternMatchPresentTest)
+	By("###Running lvmnode doesnt have vg matching vgpattern test###", vgPatternNoMatchPresentTest)
 }
 
 func capacityTest() {
-	By("Running thin volume capacity test", thinVolCapacityTest)
-	By("Running sized snapshot test", sizedSnapshotTest)
+	device := setupVg(40, "lvmvg")
+	defer cleanupVg(device, "lvmvg")
+	By("###Running thin volume capacity test###", thinVolCapacityTest)
+	By("###Running sized snapshot test###", sizedSnapshotTest)
 }

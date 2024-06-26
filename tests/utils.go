@@ -41,8 +41,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
-// IsPVCBoundEventually checks if the pvc is bound or not eventually
+// This checks if the pvc is bound eventually within the poll period.
 func IsPVCBoundEventually(pvcName string) bool {
+	ginkgo.By("Verifying pvc status to be bound eventually\n")
 	return gomega.Eventually(func() bool {
 		volume, err := PVCClient.
 			Get(pvcName, metav1.GetOptions{})
@@ -51,6 +52,16 @@ func IsPVCBoundEventually(pvcName string) bool {
 	},
 		60, 5).
 		Should(gomega.BeTrue())
+}
+
+// This checks if the pvc is Not bound consistently over polling period.
+func IsPVCPendingConsistently(pvcName string) bool {
+	ginkgo.By("Verifying pvc status to be Pending consistently\n")
+	return gomega.Consistently(func() bool {
+		volume, err := PVCClient.Get(pvcName, metav1.GetOptions{})
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
+		return !pvc.NewForAPIObject(volume).IsBound()
+	}, 30, 5).Should(gomega.BeTrue())
 }
 
 // IsPVCResizedEventually checks if the pvc is bound or not eventually
@@ -146,6 +157,48 @@ func createStorageClass() {
 	gomega.Expect(err).To(gomega.BeNil(), "while creating a default storageclass {%s}", scName)
 }
 
+func createVgPatternStorageClass() {
+	var (
+		err error
+	)
+
+	parameters := map[string]string{
+		"vgpattern": vgPattern,
+	}
+
+	ginkgo.By("building a vgpattern based storage class")
+	scObj, err = sc.NewBuilder().
+		WithGenerateName(scName).
+		WithParametersNew(parameters).
+		WithProvisioner(LocalProvisioner).Build()
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(),
+		"while building default storageclass obj with prefix {%s}", scName)
+
+	scObj, err = SCClient.Create(scObj)
+	gomega.Expect(err).To(gomega.BeNil(), "while creating a default storageclass {%s}", scName)
+}
+
+func createStorageClassWithNonExistingVg() {
+	var (
+		err error
+	)
+
+	parameters := map[string]string{
+		"volgroup": NONEXIST_VOLGROUP,
+	}
+
+	ginkgo.By("building a default storage class")
+	scObj, err = sc.NewBuilder().
+		WithGenerateName(scName).
+		WithParametersNew(parameters).
+		WithProvisioner(LocalProvisioner).Build()
+	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(),
+		"while building default storageclass obj with prefix {%s}", scName)
+
+	scObj, err = SCClient.Create(scObj)
+	gomega.Expect(err).To(gomega.BeNil(), "while creating a default storageclass {%s}", scName)
+}
+
 func createSharedVolStorageClass() {
 	var (
 		err error
@@ -193,19 +246,43 @@ func createThinStorageClass() {
 }
 
 // VerifyLVMVolume verify the properties of a lvm-volume
-func VerifyLVMVolume() {
+// expected_vg is supposed to be passed only when vgpatten was used for scheduling.
+// If its volgroup in sc then we can just match volgroup with lvmvolume's vg field.
+func VerifyLVMVolume(expect_ready bool, expected_vg string) {
 	ginkgo.By("fetching lvm volume")
+	vol_name := ""
+	if !expect_ready {
+		vol_name = pvcObj.ObjectMeta.Annotations["local.csi.openebs.io/csi-volume-name"]
+	} else {
+		vol_name = pvcObj.Spec.VolumeName
+	}
 	vol, err := LVMClient.WithNamespace(OpenEBSNamespace).
-		Get(pvcObj.Spec.VolumeName, metav1.GetOptions{})
-	gomega.Expect(err).To(gomega.BeNil(), "while fetching the lvm volume {%s}", pvcObj.Spec.VolumeName)
+		Get(vol_name, metav1.GetOptions{})
 
-	ginkgo.By("verifying lvm volume")
-	gomega.Expect(vol.Spec.VolGroup).To(gomega.Equal(scObj.Parameters["volgroup"]),
-		"while checking volume group of lvm volume", pvcObj.Spec.VolumeName)
-
-	gomega.Expect(vol.Status.State).To(gomega.Equal("Ready"),
-		"While checking if lvmvolume: %s is in Ready state", pvcObj.Spec.VolumeName)
-	gomega.Expect(vol.Finalizers[0]).To(gomega.Equal(lvm.LVMFinalizer), "while checking finializer to be set {%s}", pvcObj.Spec.VolumeName)
+	if !expect_ready {
+		if vol != nil && vol.ObjectMeta.Name == vol_name {
+			// Even if scheduler cant find the vg for scheduling it creates lvmvolume cr anyway,
+			// It gets deleted, by the csi provisioner only when the owner node of cr marks is
+			// as Failed. So incase, we do a get of cr when the cr was being handled then we expect
+			// state to be either Pending or Failed.
+			fmt.Printf("checking vol object as vol is non nil, vol is %v\n", vol)
+			gomega.Expect(vol.Status.State).To(gomega.Or(gomega.Equal("Pending"), gomega.Equal("Failed")),
+				"While checking if lvmvolume: %s is in Pending or Failed state", pvcObj.Spec.VolumeName)
+		}
+	} else {
+		gomega.Expect(err).To(gomega.BeNil(), "while fetching the lvm volume {%s}", pvcObj.Spec.VolumeName)
+		if expected_vg != "" {
+			fmt.Printf("vol is %v\n", vol)
+			gomega.Expect(vol.Spec.VolGroup).To(gomega.Equal(expected_vg),
+				"while checking volume group of lvm volume", pvcObj.Spec.VolumeName)
+		} else {
+			gomega.Expect(vol.Spec.VolGroup).To(gomega.Equal(scObj.Parameters["volgroup"]),
+				"while checking volume group of lvm volume", pvcObj.Spec.VolumeName)
+		}
+		gomega.Expect(vol.Status.State).To(gomega.Equal("Ready"),
+			"While checking if lvmvolume: %s is in Ready state", pvcObj.Spec.VolumeName)
+		gomega.Expect(vol.Finalizers[0]).To(gomega.Equal(lvm.LVMFinalizer), "while checking finializer to be set {%s}", pvcObj.Spec.VolumeName)
+	}
 }
 
 func deleteStorageClass() {
@@ -214,7 +291,7 @@ func deleteStorageClass() {
 		"while deleting lvm storageclass {%s}", scObj.Name)
 }
 
-func createAndVerifyPVC() {
+func createAndVerifyPVC(expect_bound bool) {
 	var (
 		err     error
 		pvcName = "lvmpv-pvc"
@@ -241,12 +318,14 @@ func createAndVerifyPVC() {
 		pvcName,
 		OpenEBSNamespace,
 	)
-
-	ginkgo.By("verifying pvc status as bound")
-
-	status := IsPVCBoundEventually(pvcName)
-	gomega.Expect(status).To(gomega.Equal(true),
-		"while checking status equal to bound")
+	ok := false
+	if !expect_bound {
+		ok = IsPVCPendingConsistently(pvcName)
+	} else {
+		ok = IsPVCBoundEventually(pvcName)
+	}
+	gomega.Expect(ok).To(gomega.Equal(true),
+		"while checking the pvc status")
 
 	pvcObj, err = PVCClient.WithNamespace(OpenEBSNamespace).Get(pvcObj.Name, metav1.GetOptions{})
 	gomega.Expect(err).To(
@@ -257,7 +336,7 @@ func createAndVerifyPVC() {
 	)
 }
 
-func createAndVerifyBlockPVC() {
+func createAndVerifyBlockPVC(expect_bound bool) {
 	var (
 		err     error
 		pvcName = "lvmpv-pvc"
@@ -289,10 +368,34 @@ func createAndVerifyBlockPVC() {
 		OpenEBSNamespace,
 	)
 
-	ginkgo.By("verifying pvc status as bound")
+	ginkgo.By("verifying pvc status as bound\n")
 
-	status := IsPVCBoundEventually(pvcName)
-	gomega.Expect(status).To(gomega.Equal(true),
+	ok := false
+	if !expect_bound {
+		ok = IsPVCPendingConsistently(pvcName)
+	} else {
+		ok = IsPVCBoundEventually(pvcName)
+	}
+	gomega.Expect(ok).To(gomega.Equal(true),
+		"while checking the pvc status")
+
+	pvcObj, err = PVCClient.WithNamespace(OpenEBSNamespace).Get(pvcObj.Name, metav1.GetOptions{})
+	gomega.Expect(err).To(
+		gomega.BeNil(),
+		"while retrieving pvc {%s} in namespace {%s}",
+		pvcName,
+		OpenEBSNamespace,
+	)
+}
+
+func VerifyBlockPVC() {
+	var (
+		err     error
+		pvcName = "lvmpv-pvc"
+	)
+
+	ok := IsPVCBoundEventually(pvcName)
+	gomega.Expect(ok).To(gomega.Equal(true),
 		"while checking status equal to bound")
 
 	pvcObj, err = PVCClient.WithNamespace(OpenEBSNamespace).Get(pvcObj.Name, metav1.GetOptions{})
