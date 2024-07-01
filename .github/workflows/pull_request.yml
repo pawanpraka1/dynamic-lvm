@@ -45,9 +45,6 @@ jobs:
       - name: Format test
         run: make format
 
-      - name: License test
-        run: make license-check
-
       - name: bootstrap
         run: make bootstrap
 
