@@ -43,6 +43,8 @@ import (
 const (
 	// volume group name where volume provisioning will happen
 	VOLGROUP = "lvmvg"
+	// This is supposed to be the volgroup parameter. This will not be available for provisioning in the lvmnode.
+	NONEXIST_VOLGROUP = "lvmvgn"
 )
 
 var (
@@ -65,6 +67,7 @@ var (
 
 	nodeDaemonSet        = "openebs-lvm-node"
 	controllerDeployment = "openebs-lvm-controller"
+	vgPattern 			 = "lvmvg1.*"
 
 	nsObj             *corev1.Namespace
 	scObj             *storagev1.StorageClass

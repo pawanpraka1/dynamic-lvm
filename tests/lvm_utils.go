@@ -20,17 +20,20 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 )
 
 // This creates loopdevice using the size passed as arg,
 // Uses the new loop device to create PV. returns loopdevice name to the caller.
 func createPV(size int) string {
-	fmt.Printf("Creating device\n")
+	ginkgo.By("Creating Pv")
 
 	back_file_args := []string{
-		"mktemp", "-t",
+		"mktemp",
+		"-t",
 		"openebs_lvm_localpv_disk_XXXXX",
 		"--dry-run",
 	}
@@ -39,14 +42,16 @@ func createPV(size int) string {
 	file_str := strings.TrimSpace(string(file[:]))
 	size_str := strconv.Itoa(size) + "G"
 	device_args := []string{
-		"truncate", "-s",
+		"truncate",
+		"-s",
 		size_str, file_str,
 	}
 	_, _, err := execAtLocal("sudo", nil, device_args...)
 	gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "create device failed")
 
 	args_loop := []string{
-		"losetup", "-f",
+		"losetup",
+		"-f",
 		file_str, "--show",
 	}
 	stdout_loop, _, err := execAtLocal("sudo", nil, args_loop...)
@@ -62,9 +67,29 @@ func createPV(size int) string {
 	return stdout_loop_str
 }
 
+// Gets lv_count of a specified vg, returns false if its not empty at the end of poll.
+func vgEmpty(name string) bool {
+	args_lvs := []string{
+		"vgs",
+		name,
+		"--options",
+		"lv_count",
+		"--noheadings",
+	}
+	lvs, _, _ := execAtLocal("sudo", nil, args_lvs...)
+	lvs_str := strings.TrimSpace(string(lvs))
+	lv_cnt, _ := strconv.Atoi(lvs_str)
+	fmt.Printf("lvs cnt is %d\n", lv_cnt)
+	if lv_cnt != 0 {
+		return false
+	} else {
+		return true
+	}
+}
+
 // Does pvremove on specified device. Deletes loop device and the file backing loop device.
 func removePV(device string) {
-	fmt.Printf("remove pv\n")
+	ginkgo.By("Removing pv")
 	args_pv := []string{
 		"pvremove",
 		device,
@@ -84,7 +109,8 @@ func removePV(device string) {
 	dev_str := strings.TrimSpace(string(dev))
 
 	args_loop := []string{
-		"losetup", "-d",
+		"losetup",
+		"-d",
 		device,
 	}
 	_, _, err_loop := execAtLocal("sudo", nil, args_loop...)
@@ -101,7 +127,7 @@ func removePV(device string) {
 
 // Creates vg on the specified device, Device passed should be a pv.
 func createVg(name string, device string) {
-	fmt.Printf("Creating vg\n")
+	ginkgo.By("Creating vg")
 	args_vg := []string{
 		"vgcreate", name,
 		device,
@@ -112,7 +138,7 @@ func createVg(name string, device string) {
 
 // Takes vg name and pv device, extends vg using the supplied pv.
 func extendVg(name string, device string) {
-	fmt.Printf("extending vg\n")
+	ginkgo.By("Extending vg")
 	args_vg := []string{
 		"vgextend", name,
 		device,
@@ -121,14 +147,31 @@ func extendVg(name string, device string) {
 	gomega.Expect(err_vg).To(gomega.BeNil(), "vg extend failed")
 }
 
-// Does vhremove on specified vg with force flag,
-// lv will be forcedeleted if vg is not empty.
+// Does vgremove on specified vg with -y flag if vg isnt empty after fer retires.
 func removeVg(name string) {
-	fmt.Printf("Removing vg\n")
+	ginkgo.By("Removing vg")
+	retries := 3
+	current_retry := 0
 	args_vg := []string{
 		"vgremove",
 		name,
-		"-f",
+	}
+	for {
+		if current_retry < retries {
+			vg_empty := vgEmpty(name)
+			if vg_empty {
+				fmt.Printf("No lv in vg before vg remove\n")
+				break
+			} else {
+				fmt.Printf("lv in vg during retry %d\n", current_retry)
+			}
+		} else {
+			fmt.Printf("vg still not empty after 6 seconds, moving on with force delete\n")
+			args_vg = append(args_vg, "-f")
+			break
+		}
+		current_retry += 1
+		time.Sleep(2 * time.Second)
 	}
 	_, _, err_vg := execAtLocal("sudo", nil, args_vg...)
 	gomega.Expect(err_vg).To(gomega.BeNil(), "vg remove failed")
@@ -137,6 +180,7 @@ func removeVg(name string) {
 // enable the monitoring on thinpool created for test, on local node which
 // is part of single node cluster.
 func enableThinpoolMonitoring() {
+	ginkgo.By("Enable thinpool monitoring")
 	lv := VOLGROUP + "/" + pvcObj.Spec.VolumeName
 
 	args := []string{
@@ -163,6 +207,7 @@ func enableThinpoolMonitoring() {
 
 // verify that the thinpool has extended in capacity to an expected size.
 func VerifyThinpoolExtend() {
+	ginkgo.By("Verify thinpool extend")
 	expect_size, _ := strconv.ParseInt(expanded_capacity, 10, 64)
 	lv := VOLGROUP + "/" + pvcObj.Spec.VolumeName
 

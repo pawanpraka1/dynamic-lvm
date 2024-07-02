@@ -42,15 +42,6 @@ cleanup_loopdev() {
       done
 }
 
-cleanup_lvmvg() {
-  if [ -f /tmp/openebs_ci_disk.img ]
-  then
-    sudo vgremove lvmvg -y || true
-    rm /tmp/openebs_ci_disk.img
-  fi
-  cleanup_loopdev
-}
-
 cleanup_foreign_lvmvg() {
   if [ -f /tmp/openebs_ci_foreign_disk.img ]
   then
@@ -65,7 +56,6 @@ cleanup() {
 
   echo "Cleaning up test resources"
 
-  cleanup_lvmvg
   cleanup_foreign_lvmvg
 
   kubectl delete pvc -n openebs lvmpv-pvc
@@ -79,12 +69,6 @@ cleanup() {
 [ -n "${CLEANUP_ONLY}" ] && cleanup 2>/dev/null && exit 0
 [ -n "${RESET}" ] && cleanup 2>/dev/null
 
-# setup the lvm volume group to create the volume
-cleanup_lvmvg
-truncate -s 100G /tmp/openebs_ci_disk.img
-disk="$(sudo losetup -f /tmp/openebs_ci_disk.img --show)"
-sudo pvcreate "${disk}"
-sudo vgcreate lvmvg "${disk}"
 
 # setup a foreign lvm to test
 cleanup_foreign_lvmvg
@@ -170,6 +154,8 @@ if ! ginkgo -v -coverprofile=bdd_coverage.txt -covermode=atomic; then
 sudo pvscan --cache
 
 sudo lvdisplay
+
+sudo vgdisplay
 
 echo "******************** LVM Controller logs***************************** "
 dumpControllerLogs 1000
