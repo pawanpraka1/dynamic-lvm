@@ -1,3 +1,7 @@
+v1.6.0 / 2024-07-03
+========================
+* feat(analytics): add heartbeat pinger ([#318](https://github.com/openebs/lvm-localpv/pull/318),[@niladrih](https://github.com/niladrih))
+
 v0.4.0 / 2021-04-14
 ========================
 * updated storage and apiextension version to v1 ([#40](https://github.com/openebs/lvm-localpv/pull/40),[@shubham14bajpai](https://github.com/shubham14bajpai))
