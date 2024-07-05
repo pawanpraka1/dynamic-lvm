@@ -147,7 +147,7 @@ func extendVg(name string, device string) {
 	gomega.Expect(err_vg).To(gomega.BeNil(), "vg extend failed")
 }
 
-// Does vgremove on specified vg with -y flag if vg isnt empty after fer retires.
+// Does vgremove on specified vg with -y flag if vg isnt empty after few retires.
 func removeVg(name string) {
 	ginkgo.By("Removing vg")
 	retries := 3
