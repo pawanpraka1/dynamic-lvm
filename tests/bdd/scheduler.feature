@@ -31,7 +31,7 @@
                 Then "pvc-4" lvmvolume should be placed on "pvc-1" lvmvolume node
 
             Scenario: test SpaceWeighted without vgextend logic
-                Given sc is created by not setting scheduling parameter explicitly
+                Given sc is created by not setting scheduler parameter explicitly
                 When "pvc-1" is created with using size "6G"
                 And "pvc-2" is created with using size "2G"
                 And "pvc-3" is created with using size "3G"
@@ -40,7 +40,7 @@
                 Then "pvc-4" lvmvolume should be placed on "pvc-2" lvmvolume node
 
             Scenario: test VolumeWighted logic
-                Given sc is created with scheduling parameter set to "VolumeWeighted"
+                Given sc is created with scheduler parameter set to "VolumeWeighted"
                 When "pvc-1" is created with using size "6G"
                 And "pvc-2" is created with using size "2G"
                 And "pvc-3" is created with using size "3G"
