@@ -12,9 +12,9 @@
                 When "pvc-4" is created with size "1G"
                 Then "pvc-4" lvmvolume should be placed on "pvc-3" lvmvolume node
                 When "pvc-5" is created with size "1G"
-                Then "pvc-5" lvmvolume should be placed on "pvc-4" lvmvolume node
+                Then "pvc-5" lvmvolume should be placed on "pvc-3" lvmvolume node
                 When "pvc-6" is created with size "2G"
-                Then "pvc-6" lvmvolume should be placed on "pvc-5" lvmvolume node
+                Then "pvc-6" lvmvolume should be placed on "pvc-3" lvmvolume node
                 When "pvc-7" is created with size "3G"
                 Then "pvc-7" lvmvolume should be placed on "pvc-1" or "pvc-2" lvmvolume node
                 When "pvc-8" is created with size "3G"
