@@ -39,7 +39,7 @@
                 When "pvc-4" is created with size "5G" 
                 Then "pvc-4" lvmvolume should be placed on "pvc-2" lvmvolume node
 
-            Scenario: test VolumeWighted logic
+            Scenario: test VolumeWeighted logic
                 Given sc is created with scheduler parameter set to "VolumeWeighted"
                 When "pvc-1" is created with using size "6G"
                 And "pvc-2" is created with using size "2G"
