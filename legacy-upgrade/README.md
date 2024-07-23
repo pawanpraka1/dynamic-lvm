@@ -23,7 +23,7 @@ We can upgrade the lvm driver to the latest stable release version by apply the 
 $ kubectl apply -f https://openebs.github.io/charts/lvm-operator.yaml
 ```
 
-Please note that if you were using the LVM_NAMESPACE env value other than `openebs` (default value) in which lvm-localpv CR's are created, don't forget to update that value in lvm-operator yaml file under LVM_NAMESPACE env.
+Please note that if you were using the OPENEBS_NAMESPACE env value other than `openebs` (default value) in which lvm-localpv CR's are created, don't forget to update that value in lvm-operator yaml file under OPENEBS_NAMESPACE env.
 
 For upgrading the driver to any particular release, download the lvm-operator yaml from the desired branch and update the lvm-driver image tag to the corresponding tag. For e.g, to upgrade the lvm-driver to 0.7.0 version, follow these steps:
 
@@ -44,7 +44,7 @@ one at `openebs-lvm-plugin` container image in lvm-controller deployment
               value: controller
             - name: OPENEBS_CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
-            - name: LVM_NAMESPACE
+            - name: OPENEBS_NAMESPACE
               value: openebs
 ```
 and other one at `openebs-lvm-plugin` container in lvm-node daemonset.

@@ -38,7 +38,7 @@ $ helm install [RELEASE_NAME] openebs-lvmlocalpv/lvm-localpv --namespace [NAMESP
 
 
 **Note:** If moving from the operator to helm
-- Make sure the namespace provided in the helm install command is same as `LVM_NAMESPACE` (by default it is `openebs`) env in the controller deployment.
+- Make sure the namespace provided in the helm install command is same as `OPENEBS_NAMESPACE` (by default it is `openebs`) env in the controller deployment.
 - Before installing, clean up the stale deployment and daemonset from `kube-system` namespace using the below commands
 ```sh
 kubectl delete deployment openebs-lvm-controller -n kube-system
@@ -92,7 +92,7 @@ helm install openebs-lvmlocalpv openebs-lvmlocalpv/lvm-localpv --namespace opene
 | `lvmPlugin.image.registry`                          | Registry for openebs-lvm-plugin image                                            | `""`                                    |
 | `lvmPlugin.image.repository`                        | Image repository for openebs-lvm-plugin                                          | `openebs/lvm-driver`                    |
 | `lvmPlugin.image.pullPolicy`                        | Image pull policy for openebs-lvm-plugin                                         | `IfNotPresent`                          |
-| `lvmPlugin.image.tag`                               | Image tag for openebs-lvm-plugin                                                 | `1.5.0`                                 |
+| `lvmPlugin.image.tag`                               | Image tag for openebs-lvm-plugin                                                 | `1.6.1-prerelease`                                 |
 | `lvmPlugin.metricsPort`                             | The TCP port number used for exposing lvm-metrics                                | `9500`                                  |
 | `lvmPlugin.allowedTopologies`                       | The comma seperated list of allowed node topologies                              | `kubernetes.io/hostname,`               |
 | `lvmNode.driverRegistrar.image.registry`            | Registry for csi-node-driver-registrar image                                     | `registry.k8s.io/`                      |

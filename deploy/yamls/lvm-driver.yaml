@@ -1040,7 +1040,7 @@ spec:
               value: controller
             - name: OPENEBS_CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
-            - name: LVM_NAMESPACE
+            - name: OPENEBS_NAMESPACE
               value: openebs
             - name: OPENEBS_IO_INSTALLER_TYPE
               value: "lvm-operator"
@@ -1244,7 +1244,7 @@ spec:
               value: unix:///plugin/csi.sock
             - name: OPENEBS_NODE_DRIVER
               value: agent
-            - name: LVM_NAMESPACE
+            - name: OPENEBS_NAMESPACE
               value: openebs
             - name: METRICS_LISTEN_ADDRESS
               value: :9500

@@ -35,7 +35,7 @@ const (
 	// LvmNamespaceKey is the environment variable to get openebs namespace
 	//
 	// This environment variable is set via kubernetes downward API
-	LvmNamespaceKey string = "LVM_NAMESPACE"
+	LvmNamespaceKey string = "OPENEBS_NAMESPACE"
 	// GoogleAnalyticsKey This environment variable is set via env
 	GoogleAnalyticsKey string = "OPENEBS_IO_ENABLE_ANALYTICS"
 	// LVMFinalizer for the LVMVolume CR
@@ -75,7 +75,7 @@ func init() {
 
 	LvmNamespace = os.Getenv(LvmNamespaceKey)
 	if LvmNamespace == "" && os.Getenv("OPENEBS_NODE_DRIVER") != "" {
-		klog.Fatalf("LVM_NAMESPACE environment variable not set")
+		klog.Fatalf("OPENEBS_NAMESPACE environment variable not set")
 	}
 	NodeID = os.Getenv("OPENEBS_NODE_ID")
 	if NodeID == "" && os.Getenv("OPENEBS_NODE_DRIVER") != "" {
