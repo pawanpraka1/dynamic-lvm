@@ -60,7 +60,7 @@ Define meta labels for openebs lvm-localpv components
 {{- define "lvmlocalpv.common.metaLabels" -}}
 chart: {{ template "lvmlocalpv.chart" . }}
 heritage: {{ .Release.Service }}
-openebs.io/version: {{ .Values.release.version | quote }}
+openebs.io/version: {{ .Chart.AppVersion | quote }}
 role: {{ .Values.role | quote }}
 {{- end -}}
 

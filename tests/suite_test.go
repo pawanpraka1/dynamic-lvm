@@ -65,9 +65,9 @@ var (
 	// default one fio app for most tests.
 	appNames = []string{"fio-ci-0"}
 
-	nodeDaemonSet        = "openebs-lvm-node"
-	controllerDeployment = "openebs-lvm-controller"
-	vgPattern 			 = "lvmvg1.*"
+	nodeDaemonSet        = "lvm-localpv-node"
+	controllerDeployment = "lvm-localpv-controller"
+	vgPattern            = "lvmvg1.*"
 
 	nsObj             *corev1.Namespace
 	scObj             *storagev1.StorageClass
@@ -84,9 +84,9 @@ var (
 func init() {
 	KubeConfigPath = os.Getenv("KUBECONFIG")
 
-	OpenEBSNamespace = os.Getenv("LVM_NAMESPACE")
+	OpenEBSNamespace = os.Getenv("OPENEBS_NAMESPACE")
 	if OpenEBSNamespace == "" {
-		klog.Fatalf("LVM_NAMESPACE environment variable not set")
+		klog.Fatalf("OPENEBS_NAMESPACE environment variable not set")
 	}
 
 	var err error

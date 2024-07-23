@@ -8,12 +8,12 @@
 # Create the OpenEBS namespace
 # This is the default namespace where the LVM driver will create all
 # its resources. If we want to change it to use a different namespace
-# modify this to create the new namespace and also modify the LVM_NAMESPACE
+# modify this to create the new namespace and also modify the OPENEBS_NAMESPACE
 # env for the LVM Driver's controller and agent deployments.
 # please note that this should be changed while initial setup, once LVM Driver
 # is deployed with a namespace, we should never modify it as old resources will
 # not be available under the new namespace and LVM Driver looks for all the resources
-# in the LVM_NAMESPACE namespace passed as an env.
+# in the OPENEBS_NAMESPACE namespace passed as an env.
 
 apiVersion: v1
 kind: Namespace
@@ -1476,7 +1476,7 @@ spec:
               value: controller
             - name: OPENEBS_CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
-            - name: LVM_NAMESPACE
+            - name: OPENEBS_NAMESPACE
               value: openebs
             - name: OPENEBS_IO_INSTALLER_TYPE
               value: "lvm-operator"
@@ -1627,7 +1627,7 @@ spec:
       labels:
         app: openebs-lvm-node
         role: openebs-lvm
-        openebs.io/component-name: openebs-lvm-node
+        openebs.io/component-name: openebs-lvm-localpv-node
         openebs.io/version: ci
     spec:
       priorityClassName: openebs-lvm-localpv-csi-node-critical
@@ -1680,7 +1680,7 @@ spec:
               value: unix:///plugin/csi.sock
             - name: OPENEBS_NODE_DRIVER
               value: agent
-            - name: LVM_NAMESPACE
+            - name: OPENEBS_NAMESPACE
               value: openebs
             - name: METRICS_LISTEN_ADDRESS
               value: :9500

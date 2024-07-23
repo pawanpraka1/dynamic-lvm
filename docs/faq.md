@@ -27,7 +27,7 @@ env:
     value: unix:///plugin/csi.sock
   - name: OPENEBS_NODE_DRIVER
     value: agent
-  - name: LVM_NAMESPACE
+  - name: OPENEBS_NAMESPACE
     value: openebs
   - name: ALLOWED_TOPOLOGIES
     value: "openebs.io/rack"
