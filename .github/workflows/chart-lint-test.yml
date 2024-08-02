@@ -1,16 +1,17 @@
 name: Chart Lint and Test
 
-on:
-  push:
-    paths:
-      - 'deploy/helm/**'
-    branches:
-      - develop
-  pull_request:
-    paths:
-      - 'deploy/helm/**'
-    branches:
-      - develop
+#on:
+#  push:
+#    paths:
+#      - 'deploy/helm/**'
+#    branches:
+#      - develop
+#  pull_request:
+#    paths:
+#      - 'deploy/helm/**'
+#    branches:
+#      - 'develop'
+#      - 'release/**'
 
 jobs:
   lint-test:

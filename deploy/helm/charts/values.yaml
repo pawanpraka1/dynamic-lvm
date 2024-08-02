@@ -1,8 +1,6 @@
 # Default values for openebs-lvmlocalpv.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-release:
-  version: "1.6.0"
 
 imagePullSecrets:
 # - name: "image-pull-secret"
@@ -151,7 +149,7 @@ lvmPlugin:
     repository: openebs/lvm-driver
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 1.6.0
+    tag: 1.7.0-develop
   ioLimits:
     enabled: false
     containerRuntime: containerd

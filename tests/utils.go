@@ -744,7 +744,7 @@ func WaitForLVMVolumeReady() {
 func scaleControllerPlugin(num int32) int32 {
 	ginkgo.By(fmt.Sprintf("scaling controller plugin deployment %v to size %v", controllerDeployment, num))
 
-	scale, err := K8sClient.AppsV1().Deployments(metav1.NamespaceSystem).
+	scale, err := K8sClient.AppsV1().Deployments(OpenEBSNamespace).
 		GetScale(context.Background(), controllerDeployment, metav1.GetOptions{})
 	gomega.Expect(err).To(
 		gomega.BeNil(),
@@ -755,14 +755,14 @@ func scaleControllerPlugin(num int32) int32 {
 		return existingReplicas
 	}
 	scale.Spec.Replicas = num
-	scale, err = K8sClient.AppsV1().Deployments(metav1.NamespaceSystem).
+	scale, err = K8sClient.AppsV1().Deployments(OpenEBSNamespace).
 		UpdateScale(context.Background(), controllerDeployment, scale, metav1.UpdateOptions{})
 	gomega.Expect(err).To(
 		gomega.BeNil(),
 		"update replicas of deployment %v to %v", controllerDeployment, num)
 
 	scaled := gomega.Eventually(func() bool {
-		scale, err = K8sClient.AppsV1().Deployments(metav1.NamespaceSystem).
+		scale, err = K8sClient.AppsV1().Deployments(OpenEBSNamespace).
 			GetScale(context.Background(), controllerDeployment, metav1.GetOptions{})
 		gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 		return scale.Spec.Replicas == num
@@ -785,14 +785,14 @@ func deleteNodeDaemonSet() *appsv1.DaemonSet {
 
 	ginkgo.By("deleting node plugin daemonset " + nodeDaemonSet)
 	ds, err := K8sClient.AppsV1().
-		DaemonSets(metav1.NamespaceSystem).
+		DaemonSets(OpenEBSNamespace).
 		Get(context.Background(), nodeDaemonSet, metav1.GetOptions{})
 	gomega.Expect(err).To(
 		gomega.BeNil(),
 		"fetching node plugin daemonset %v", nodeDaemonSet)
 	policy := metav1.DeletePropagationForeground
 	err = K8sClient.AppsV1().
-		DaemonSets(metav1.NamespaceSystem).
+		DaemonSets(OpenEBSNamespace).
 		Delete(context.Background(), nodeDaemonSet, metav1.DeleteOptions{
 			PropagationPolicy: &policy,
 		})
@@ -803,7 +803,7 @@ func deleteNodeDaemonSet() *appsv1.DaemonSet {
 	ginkgo.By("waiting for deletion of node plugin pods")
 	status := gomega.Eventually(func() bool {
 		_, err = K8sClient.AppsV1().
-			DaemonSets(metav1.NamespaceSystem).
+			DaemonSets(OpenEBSNamespace).
 			Get(context.Background(), nodeDaemonSet, metav1.GetOptions{})
 		return k8serrors.IsNotFound(err)
 	}, 120, 10).Should(gomega.BeTrue())
@@ -828,7 +828,7 @@ func createNodeDaemonSet(ds *appsv1.DaemonSet) {
 	ds.SetResourceVersion("") // reset the resource version for creation.
 	ginkgo.By("creating node plugin daemonset " + nodeDaemonSet)
 	_, err := K8sClient.AppsV1().
-		DaemonSets(metav1.NamespaceSystem).
+		DaemonSets(OpenEBSNamespace).
 		Create(context.Background(), ds, metav1.CreateOptions{})
 	gomega.Expect(err).To(
 		gomega.BeNil(),
