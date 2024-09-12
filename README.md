@@ -15,8 +15,8 @@
 LocalPV-LVM CSI Driver became GA in August 2021 (with the release v0.8.0). It is now a very mature product and a core component of the OpenEBS storage platform.
 Due to the major adoption of LocalPV-LVM (+50,000 users), this Data-Engine is now being unified and integrated into the core OpenEBS Storage platform; instead of being maintained as an external Data-Engine within our project.
 
-Our [2024 Roadmap is here](https://github.com/openebs/openebs/blob/main/ROADMAP.md). It defines a rich set of new featrues, which covers the integration of LocalPV-LVM into the core OpenEBS platform.<br>
-Please review this roadmp and feel free to pass back any feedback on it, as well as recommend and suggest new ideas regarding LocalPV-LVM. We welcome all your feedback.
+Our [2024 Roadmap is here](https://github.com/openebs/openebs/blob/main/ROADMAP.md). It defines a rich set of new features, which covers the integration of LocalPV-LVM into the core OpenEBS platform.<br>
+Please review this roadmap and feel free to pass back any feedback on it, as well as recommend and suggest new ideas regarding LocalPV-LVM. We welcome all your feedback.
 <br>
 <BR>
 
@@ -25,8 +25,8 @@ Please review this roadmp and feel free to pass back any feedback on it, as well
 >
 > :rocket: &nbsp; OpenEBS is the #1 deployed Storage Platform for Kubernetes <BR>
 > :zap: &nbsp; LocalPV-LVM is the 3rd most deployed Data-Engine within the platform <BR>
-> :sunglasses: &nbsp; LocalPV-LVM has +50,000 Daily Acive Users <BR>
-> :sunglasses: &nbsp; LocalPV-LVM has +120,000 Global instllations <BR>
+> :sunglasses: &nbsp; LocalPV-LVM has +50,000 Daily Active Users <BR>
+> :sunglasses: &nbsp; LocalPV-LVM has +120,000 Global installations <BR>
 > :floppy_disk: &nbsp; +49 Million OpenEBS Volumes have been deployed globally <BR>
 > :tv: &nbsp; We have +8 Million Global OpenEBS installations <BR>
 > :star: &nbsp; We are the [#1 GitHub Star ranked](https://github.com/openebs/website/blob/main/website/public/images/png/github_star-history-2024_Feb_1.png) K8s Data Storage platform <BR>
@@ -51,14 +51,14 @@ The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects
 > Before installing the LocalPV-LVM driver please make sure your Kubernetes Cluster meets the following prerequisites:
 > 1. All the nodes must have LVM2 utils package installed
 > 2. All the nodes must have dm-snapshot Kernel Module loaded - (Device Mapper Snapshot)
-> 4. You have access to install RBAC components into `<OPENEBS>` namespace.
+> 3. You have access to install RBAC components into `<OPENEBS>` namespace.
 <BR>
 
 <!-- > [!NOTE]
 > - Full LVM2 dynamic provisioning is now supported <BR>
-> - All Volume Groups (VG), Physical Volumes (PV) and Logical Volumes (LV) willbe dynamically provisionsed for you by OpenEBS <BR>
-> - There is need  to manually provison any PV, VG or LV's  <BR>
-> - Dynamic RAID provisioning is still in development. RAID LV's must be deployed via the manual pre configuiration method <BR> -->
+> - All Volume Groups (VG), Physical Volumes (PV) and Logical Volumes (LV) will be dynamically provisioned for you by OpenEBS <BR>
+> - There is need to manually provision any PV, VG or LV's  <BR>
+> - Dynamic RAID provisioning is still in development. RAID LV's must be deployed via the manual pre configuration method <BR> -->
 
 ### Supported System
 
@@ -98,7 +98,7 @@ sudo vgcreate lvmvg /dev/loop0       ## here lvmvg is the volume group name to b
 
 ## Installation
 
-Install the latest release of OpenEBS LVM2 LocalPV-LVM driver by running the following command. Note: All nodes must be running the same verison of LocalPV-LVM, LMV2, device-mapper & dm-snapshot.
+Install the latest release of OpenEBS LVM2 LocalPV-LVM driver by running the following command. Note: All nodes must be running the same version of LocalPV-LVM, LMV2, device-mapper & dm-snapshot.
 
 **NOTE:** Installation using operator YAMLs is not the supported way any longer.  
 We can install the latest release of OpenEBS LVM driver by running the following command:
@@ -222,7 +222,7 @@ spec:
 ```
 
 After the deployment of the application, we can go to the node and see that the lvm volume is being used
-by the application for reading/writting the data and space is consumed from the LVM. Please note that to check the provisioned volumes on the node, we need to run `pvscan --cache` command to update the lvm cache and then we can use lvdisplay and all other lvm commands on the node.
+by the application for reading/writing the data and space is consumed from the LVM. Please note that to check the provisioned volumes on the node, we need to run `pvscan --cache` command to update the lvm cache and then we can use lvdisplay and all other lvm commands on the node.
 
 #### 4. Deprovisioning
 
