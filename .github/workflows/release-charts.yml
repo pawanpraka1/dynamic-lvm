@@ -1,11 +1,11 @@
 name: Release Charts
 
-#on:
-#  push:
-#    paths:
-#      - 'deploy/helm/**'
-#    branches:
-#      - develop
+on:
+ push:
+   paths:
+     - 'deploy/helm/**'
+   branches:
+     - develop
 
 jobs:
   release:
