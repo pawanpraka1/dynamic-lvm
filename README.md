@@ -12,7 +12,7 @@
 <BR>
 
 ## Overview
-LocalPV-LVM CSI Driver became GA in August 2021 (with the release v0.8.0). It is now a a very mature product and a core component of the OpenEBS storage platform.
+LocalPV-LVM CSI Driver became GA in August 2021 (with the release v0.8.0). It is now a very mature product and a core component of the OpenEBS storage platform.
 Due to the major adoption of LocalPV-LVM (+50,000 users), this Data-Engine is now being unified and integrated into the core OpenEBS Storage platform; instead of being maintained as an external Data-Engine within our project.
 
 Our [2024 Roadmap is here](https://github.com/openebs/openebs/blob/main/ROADMAP.md). It defines a rich set of new featrues, which covers the integration of LocalPV-LVM into the core OpenEBS platform.<br>
