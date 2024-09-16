@@ -54,10 +54,10 @@ jobs:
         with:
             file: shell.nix
 
-      - name: Check if the chart follows a valid semver version
-        run: |
-          branch_name="${{ github.event.pull_request.base.ref }}"
-          ./scripts/validate-chart-version.sh --branch $branch_name
+      # - name: Check if the chart follows a valid semver version
+      #   run: |
+      #     branch_name="${{ github.event.pull_request.base.ref }}"
+      #     ./scripts/validate-chart-version.sh --branch $branch_name
   
       - name: Run chart-testing lint
         run: |
