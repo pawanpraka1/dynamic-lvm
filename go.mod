@@ -21,8 +21,8 @@ require (
 	k8s.io/apimachinery v0.27.2
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 	k8s.io/code-generator v0.27.2
-	k8s.io/klog/v2 v2.100.1
-	k8s.io/utils v0.0.0-20230505201702-9f6742963106
+	k8s.io/klog/v2 v2.130.1
+	k8s.io/utils v0.0.0-20240902221715-702e33fdd3c3
 	sigs.k8s.io/controller-runtime v0.2.0
 	sigs.k8s.io/yaml v1.3.0
 )
@@ -35,7 +35,7 @@ require (
 	github.com/emicklei/go-restful/v3 v3.10.2 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-logr/logr v1.2.4 // indirect
+	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect

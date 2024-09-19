@@ -53,6 +53,10 @@ type MountInfo struct {
 	// MountOptions specifies the options with
 	// which mount needs to be attempted
 	MountOptions []string `json:"mountOptions"`
+
+	// MKFSOptions specifies the options that
+	// will be added to newly created volume on first use
+	MKFSOptions []string `json:"mkfsOptions"`
 }
 
 // PodLVInfo contains the pod, LVGroup related info
