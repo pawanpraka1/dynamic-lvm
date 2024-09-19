@@ -28,8 +28,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"k8s.io/klog/v2"
+	"k8s.io/mount-utils"
 	utilexec "k8s.io/utils/exec"
-	"k8s.io/utils/mount"
 
 	apis "github.com/openebs/lvm-localpv/pkg/apis/openebs.io/lvm/v1alpha1"
 )
@@ -56,7 +56,7 @@ type MountInfo struct {
 
 	// MKFSOptions specifies the options that
 	// will be added to newly created volume on first use
-	MKFSOptions []string `json:"mkfsOptions"`
+	FormatOptions []string `json:"formatOptions"`
 }
 
 // PodLVInfo contains the pod, LVGroup related info
@@ -72,7 +72,7 @@ type PodLVInfo struct {
 func FormatAndMountVol(devicePath string, mountInfo *MountInfo) error {
 	mounter := &mount.SafeFormatAndMount{Interface: mount.New(""), Exec: utilexec.New()}
 
-	err := mounter.FormatAndMount(devicePath, mountInfo.MountPath, mountInfo.FSType, mountInfo.MountOptions)
+	err := mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, mountInfo.MountPath, mountInfo.FSType, mountInfo.MountOptions, nil, mountInfo.FormatOptions)
 	if err != nil {
 		klog.Errorf(
 			"lvm: failed to mount volume %s [%s] to %s, error %v",
