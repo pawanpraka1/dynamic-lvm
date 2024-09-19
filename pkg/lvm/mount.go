@@ -54,7 +54,7 @@ type MountInfo struct {
 	// which mount needs to be attempted
 	MountOptions []string `json:"mountOptions"`
 
-	// MKFSOptions specifies the options that
+	// FormatOptions specifies the options that
 	// will be added to newly created volume on first use
 	FormatOptions []string `json:"formatOptions"`
 }
