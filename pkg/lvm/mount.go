@@ -72,7 +72,14 @@ type PodLVInfo struct {
 func FormatAndMountVol(devicePath string, mountInfo *MountInfo) error {
 	mounter := &mount.SafeFormatAndMount{Interface: mount.New(""), Exec: utilexec.New()}
 
-	err := mounter.FormatAndMountSensitiveWithFormatOptions(devicePath, mountInfo.MountPath, mountInfo.FSType, mountInfo.MountOptions, nil, mountInfo.FormatOptions)
+	err := mounter.FormatAndMountSensitiveWithFormatOptions(
+		devicePath,
+		mountInfo.MountPath,
+		mountInfo.FSType,
+		mountInfo.MountOptions,
+		nil, // sensitiveOptions
+		mountInfo.FormatOptions,
+	)
 	if err != nil {
 		klog.Errorf(
 			"lvm: failed to mount volume %s [%s] to %s, error %v",
