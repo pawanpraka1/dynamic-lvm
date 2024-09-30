@@ -3,16 +3,16 @@ name: Pull Request CI
 on:
   pull_request:
     branches:
-      - 'develop'
-      - 'release/**'
+      - develop
+      - "release/**"
     paths-ignore:
-      - '*.md'
-      - 'BUILDMETA'
-      - 'changelogs/**'
-      - 'docs/**'
-      - 'design/**'
-      - 'LICENSE'
-      - 'MAINTAINERS'
+      - "*.md"
+      - "BUILDMETA"
+      - "changelogs/**"
+      - "docs/**"
+      - "design/**"
+      - "LICENSE"
+      - "MAINTAINERS"
 
 jobs:
   lint:
@@ -29,12 +29,6 @@ jobs:
           go-version: 1.19.9
           cache: false
 
-      - name: Format test
-        run: make format
-
-      - name: bootstrap
-        run: make bootstrap
-
       - name: Lint Check
         uses: golangci/golangci-lint-action@v4
         with:
@@ -46,19 +40,19 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
-          path: '.'
-          pattern: '*.sh'
+          path: "."
+          pattern: "*.sh"
 
       - uses: cachix/install-nix-action@v22
       - uses: rrbutani/use-nix-shell-action@v1.1.0
         with:
             file: shell.nix
 
-      # - name: Check if the chart follows a valid semver version
-      #   run: |
-      #     branch_name="${{ github.event.pull_request.base.ref }}"
-      #     ./scripts/validate-chart-version.sh --branch $branch_name
-  
+      - name: Check if the chart follows a valid semver version
+        run: |
+          branch_name="${{ github.event.pull_request.base.ref }}"
+          ./scripts/validate-chart-version.sh --branch $branch_name
+
       - name: Run chart-testing lint
         run: |
           ct lint --config ct.yaml
@@ -79,7 +73,7 @@ jobs:
         run: make test
 
       - name: Upload Coverage Report
-        uses: codecov/codecov-action@v4  
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.txt
@@ -87,7 +81,7 @@ jobs:
           flags: unittests
 
   bdd-tests:
-    needs: ['unit-tests']
+    needs: ["unit-tests"]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -96,11 +90,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
-      - uses: cachix/install-nix-action@v22
-      - uses: rrbutani/use-nix-shell-action@v1.1.0
-        with:
-          file: shell.nix
 
       - name: Set up Go 1.19
         uses: actions/setup-go@v5
@@ -119,17 +108,18 @@ jobs:
           driver: none
           kubernetes-version: ${{ matrix.kubernetes }}
           cni: calico
-          start-args: '--install-addons=false'
+          start-args: "--install-addons=false"
 
       - name: Setting environment variables
         run: |
           echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
-          echo "OPENEBS_NAMESPACE=openebs" >> $GITHUB_ENV
 
       - name: bootstrap
         run: make bootstrap
 
       - name: Running tests
+        env:
+          OPENEBS_NAMESPACE: "openebs"
         run: ./ci/ci-test.sh
 
       - name: Upload Coverage Report
@@ -142,7 +132,7 @@ jobs:
 
   csi-driver:
     runs-on: ubuntu-latest
-    needs: ['lint', 'unit-tests', 'bdd-tests']
+    needs: ["lint", "unit-tests", "bdd-tests"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
