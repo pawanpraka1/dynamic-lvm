@@ -1,66 +1,44 @@
-# Copyright 2020 The OpenEBS Authors. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-name: build
+name: Build and Push
 
 on:
   create:
   push:
     branches:
-      - 'develop'
-      - 'v*'
+      - develop
+      - "release/**"
     paths-ignore:
-      - '*.md'
-      - 'BUILDMETA'
-      - 'changelogs/**'
-      - 'deploy/helm/**'
-      - 'docs/**'
-      - 'LICENSE'
-      - 'MAINTAINERS'
+      - "*.md"
+      - "BUILDMETA"
+      - "changelogs/**"
+      - "deploy/helm/**"
+      - "docs/**"
+      - "design/**"
+      - "LICENSE"
+      - "MAINTAINERS"
 
 jobs:
   lint:
-    # to ignore builds on release
-    if: ${{ (github.event.ref_type != 'tag') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Shellcheck
-        uses: reviewdog/action-shellcheck@v1
         with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-          path: '.'
-          pattern: '*.sh'
-          exclude: './.git/*'
+          fetch-depth: 0
 
-      - name: Set up Go 1.19
-        uses: actions/setup-go@v5
+      - uses: cachix/install-nix-action@v22
+      - uses: rrbutani/use-nix-shell-action@v1.1.0
         with:
-          go-version: 1.19.9
-          cache: false
+          file: shell.nix
 
-      - name: Lint Check
-        uses: golangci/golangci-lint-action@v4
-        with:
-          version: v1.56.2
-          args: -E exportloopref,dupl,revive,bodyclose,goconst,misspell -D structcheck --timeout 5m0s
+      - name: Check if the chart follows a valid semver version
+        run: |
+          BRANCH=${{ github.ref_name }}
+          ./scripts/validate-chart-version.sh --branch $BRANCH
+      - name: Run chart-testing lint
+        run: |
+          ct lint --config ct.yaml
 
-  unit-test:
-    # to ignore builds on release
-    if: ${{ (github.event.ref_type != 'tag') }}
+  unit-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -76,15 +54,15 @@ jobs:
         run: make test
 
       - name: Upload Coverage Report
-        uses: codecov/codecov-action@v4  
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.txt
           name: coverage-$(date +%s)
           flags: unittests
 
-  bdd-test:
-    needs: ['unit-test']
+  bdd-tests:
+    needs: ["unit-tests"]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -108,7 +86,7 @@ jobs:
           driver: none
           kubernetes-version: ${{ matrix.kubernetes }}
           cni: calico
-          start-args: '--install-addons=false'
+          start-args: "--install-addons=false"
 
       - name: Build images locally
         run: make lvm-driver-image || exit 1;
@@ -127,44 +105,14 @@ jobs:
           name: coverage-bdd_coverage-$(date +%s)
           flags: bddtests
 
-  ansible:
-    runs-on: ubuntu-latest
-    needs: ['lint', 'unit-test', 'bdd-test']
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set Image Org
-        # sets the default IMAGE_ORG to openebs
-        run: |
-          [ -z "${{ secrets.IMAGE_ORG }}" ] && IMAGE_ORG=openebs || IMAGE_ORG=${{ secrets.IMAGE_ORG}}
-          echo "IMAGE_ORG=${IMAGE_ORG}" >> $GITHUB_ENV
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push the ansible image
-        uses: docker/build-push-action@v5
-        with:
-          file: ./e2e-tests/Dockerfile
-          push: true
-          load: false
-          platforms: linux/amd64
-          tags: |
-            ${{ env.IMAGE_ORG }}/lvm-localpv-e2e:ci
-
   csi-driver:
     runs-on: ubuntu-latest
-    needs: ['lint', 'unit-test', 'bdd-test']
+    needs: ["lint", "bdd-tests"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set Image Org
-        # sets the default IMAGE_ORG to openebs
         run: |
           [ -z "${{ secrets.IMAGE_ORG }}" ] && IMAGE_ORG=openebs || IMAGE_ORG=${{ secrets.IMAGE_ORG }}
           echo "IMAGE_ORG=${IMAGE_ORG}" >> $GITHUB_ENV
@@ -174,15 +122,11 @@ jobs:
         run: |
           echo "DATE=$(date -u +'%Y-%m-%dT%H:%M:%S%Z')" >> $GITHUB_OUTPUT
 
-      - name: Set Tag
+      - name: Set IMAGE_TAG and BRANCH
         run: |
-          BRANCH="${GITHUB_REF##*/}"
-          CI_TAG=${BRANCH#v}-ci
-          if [ ${BRANCH} = "develop" ]; then
-            CI_TAG="ci"
-          fi
-          echo "TAG=${CI_TAG}" >> $GITHUB_ENV
-          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
+          BRANCH=${{ github.ref_name }}
+          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$(awk -F': ' '/^version:/ {print $$2}' deploy/helm/charts/Chart.yaml)" >> $GITHUB_ENV
 
       - name: Docker meta
         id: docker_meta
@@ -195,11 +139,11 @@ jobs:
             ghcr.io/${{ env.IMAGE_ORG }}/lvm-driver
           tags: |
             type=raw,value=latest,enable=false
-            type=raw,value=${{ env.TAG }}
+            type=raw,value=${{ env.IMAGE_TAG }}
 
       - name: Print Tag info
         run: |
-          echo "BRANCH: ${BRANCH}"
+          echo "BRANCH: ${env.BRANCH}"
           echo "${{ steps.docker_meta.outputs.tags }}"
 
       - name: Set up QEMU
@@ -247,3 +191,14 @@ jobs:
             DBUILD_REPO_URL=https://github.com/openebs/lvm-localpv
             DBUILD_SITE_URL=https://openebs.io
             BRANCH=${{ env.BRANCH }}
+
+  release-chart:
+    runs-on: ubuntu-latest
+    needs: ["csi-driver"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish lvm localpv develop or prerelease helm chart
+        uses: stefanprodan/helm-gh-pages@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          charts_dir: ./deploy/helm
