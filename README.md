@@ -53,9 +53,8 @@ The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects
 <BR>
 
 <!-- > [!NOTE]
-> - Full LVM2 dynamic provisioning is now supported <BR>
-> - All Volume Groups (VG), Physical Volumes (PV) and Logical Volumes (LV) will be dynamically provisioned for you by OpenEBS <BR>
-> - There is need to manually provision any PV, VG or LV's  <BR>
+> - LocalPV-LVM will not provision the VG for the user <BR>
+> - The required Physical Volumes(PV) and Volume Group(VG) names will need to be created and present beforehand. <BR>
 > - Dynamic RAID provisioning is still in development. RAID LV's must be deployed via the manual pre configuration method <BR> -->
 
 ### Supported System
@@ -81,9 +80,8 @@ sudo losetup -f /tmp/disk.img --show
 ```
 
 > [!NOTE]
-> - This is the old maual config process <BR>
-> - LocalPV-LVM will num dynamically provision the VG fro you <BR>
-> - The PV, VG and LV names will be dynamically provisioned by OpenEBS LocalPV-LVM as K8s unique entities (for safety, you cannot provide your own PV, VG or LV names)
+> - LocalPV-LVM will not provision the VG for the user <BR>
+> - The required Physical Volumes(PV) and Volume Group(VG) names will need to be created and present beforehand.
 
 Create the Volume group on all the nodes, which will be used by the LVM2 Driver for provisioning the volumes
 
