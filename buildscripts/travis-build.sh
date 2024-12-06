@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 # Copyright 2020 The OpenEBS Authors.
 #
