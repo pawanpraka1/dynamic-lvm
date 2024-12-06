@@ -1,11 +1,9 @@
 ## OpenEBS - LocalPV-LVM CSI Driver
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fopenebs%2Flvm-localpv.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fopenebs%2Flvm-localpv?ref=badge_shield)
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3523/badge)](https://bestpractices.coreinfrastructure.org/en/projects/4548)
-[![Slack](https://img.shields.io/badge/chat!!!-slack-ff1493.svg?style=flat-square)](https://kubernetes.slack.com/messages/openebs)
-[![Community Meetings](https://img.shields.io/badge/Community-Meetings-blue)](https://hackmd.io/yJb407JWRyiwLU-XDndOLA?view)
+[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B162%2Fgithub.com%2Fopenebs%2Flvm-localpv.svg?type=shield&issueType=license)](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2Fopenebs%2Flvm-localpv?ref=badge_shield&issueType=license)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/4548/badge)](https://www.bestpractices.dev/projects/4548)
+[![Slack](https://img.shields.io/badge/chat-slack-ff1493.svg?style=flat-square)](https://kubernetes.slack.com/messages/openebs)
+[![Community Meetings](https://img.shields.io/badge/Community-Meetings-blue)](https://us05web.zoom.us/j/87535654586?pwd=CigbXigJPn38USc6Vuzt7qSVFoO79X.1)
 [![Go Report](https://goreportcard.com/badge/github.com/openebs/lvm-localpv)](https://goreportcard.com/report/github.com/openebs/lvm-localpv)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopenebs%2Flvm-localpv.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopenebs%2Flvm-localpv?ref=badge_shield)
-
 
 | [![Linux LVM2](https://github.com/openebs/website/blob/main/website/public/images/png/LVM_logo_1.png "Linux LVM2")](https://github.com/openebs/website/blob/main/website/public/images/png/LVM_logo_1.png) | The OpenEBS LocalPV-LVM Data-Engine is a mature and well deployed production grade CSI driver for dynamically provisioning Node Local Volumes into a K8s cluster utilizing the LINUX LVM2 Data / storage Mgmt stack as the storage backend. It integrates LVM2 into the OpenEBS platform and exposes many LVM2 services and capabilities.   |
 | :---  | :--- |
@@ -55,9 +53,8 @@ The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects
 <BR>
 
 <!-- > [!NOTE]
-> - Full LVM2 dynamic provisioning is now supported <BR>
-> - All Volume Groups (VG), Physical Volumes (PV) and Logical Volumes (LV) will be dynamically provisioned for you by OpenEBS <BR>
-> - There is need to manually provision any PV, VG or LV's  <BR>
+> - LocalPV-LVM will not provision the VG for the user <BR>
+> - The required Physical Volumes(PV) and Volume Group(VG) names will need to be created and present beforehand. <BR>
 > - Dynamic RAID provisioning is still in development. RAID LV's must be deployed via the manual pre configuration method <BR> -->
 
 ### Supported System
@@ -83,9 +80,8 @@ sudo losetup -f /tmp/disk.img --show
 ```
 
 > [!NOTE]
-> - This is the old maual config process <BR>
-> - LocalPV-LVM will num dynamically provision the VG fro you <BR>
-> - The PV, VG and LV names will be dynamically provisioned by OpenEBS LocalPV-LVM as K8s unique entities (for safety, you cannot provide your own PV, VG or LV names)
+> - LocalPV-LVM will not provision the VG for the user <BR>
+> - The required Physical Volumes(PV) and Volume Group(VG) names will need to be created and present beforehand.
 
 Create the Volume group on all the nodes, which will be used by the LVM2 Driver for provisioning the volumes
 
@@ -259,5 +255,5 @@ Features
 - Resize of volumes with snapshot is not supported
 
 
-## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopenebs%2Flvm-localpv.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopenebs%2Flvm-localpv?ref=badge_large)
+## License Compliance
+[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B162%2Fgithub.com%2Fopenebs%2Flvm-localpv.svg?type=large&issueType=license)](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2Fopenebs%2Flvm-localpv?ref=badge_large&issueType=license)

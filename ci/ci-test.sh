@@ -15,6 +15,7 @@ fi
 # foreign systemid for the testing environment.
 FOREIGN_LVM_SYSTEMID="openebs-ci-test-system"
 FOREIGN_LVM_CONFIG="global{system_id_source=lvmlocal}local{system_id=${FOREIGN_LVM_SYSTEMID}}"
+CRDS_TO_DELETE_ON_CLEANUP="lvmnodes.local.openebs.io lvmsnapshots.local.openebs.io lvmvolumes.local.openebs.io volumesnapshotclasses.snapshot.storage.k8s.io volumesnapshotcontents.snapshot.storage.k8s.io volumesnapshots.snapshot.storage.k8s.io"
 
 # Clean up generated resources for successive tests.
 cleanup_loopdev() {
@@ -41,10 +42,11 @@ cleanup() {
 
   cleanup_foreign_lvmvg
 
-  kubectl delete pvc -n openebs lvmpv-pvc
+  kubectl delete pvc -n "$OPENEBS_NAMESPACE" lvmpv-pvc
   kubectl delete -f "${SNAP_CLASS}"
 
   helm uninstall lvm-localpv -n "$OPENEBS_NAMESPACE" || true
+  kubectl delete crds "$CRDS_TO_DELETE_ON_CLEANUP"
   # always return true
   return 0
 }
@@ -70,7 +72,6 @@ sudo sed -i '/^[^#]*thin_pool_autoextend_percent/ s/= .*/= 20/' /etc/lvm/lvm.con
 
 # Prepare env for running BDD tests
 # Minikube is already running
-
 helm install lvm-localpv ./deploy/helm/charts -n "$OPENEBS_NAMESPACE" --create-namespace --set lvmPlugin.pullPolicy=Never --set analytics.enabled=false
 kubectl apply -f "${SNAP_CLASS}"
 
@@ -160,10 +161,10 @@ echo "get sc details"
 kubectl get sc --all-namespaces -oyaml
 
 echo "get lvm volume details"
-kubectl get lvmvolumes.local.openebs.io -n openebs -oyaml
+kubectl get lvmvolumes.local.openebs.io -n "$OPENEBS_NAMESPACE" -oyaml
 
 echo "get lvm snapshot details"
-kubectl get lvmsnapshots.local.openebs.io -n openebs -oyaml
+kubectl get lvmsnapshots.local.openebs.io -n "$OPENEBS_NAMESPACE" -oyaml
 
 exit 1
 fi
