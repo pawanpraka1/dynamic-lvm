@@ -8,5 +8,6 @@ pkgs.mkShell {
     semver-tool
     yq-go
     chart-testing
+    kubernetes-controller-tools
   ];
 }
