@@ -13,7 +13,7 @@ pkgs.mkShell {
     kubectl
     kubernetes-controller-tools
     kubernetes-helm
-    make
+    gnumake
     minikube
     semver-tool
     yq-go
