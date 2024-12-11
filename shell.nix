@@ -5,7 +5,6 @@ in
 pkgs.mkShell {
   name = "scripts-shell";
   buildInputs = with pkgs; [
-    minikube
     chart-testing
     ginkgo
     git
@@ -14,6 +13,8 @@ pkgs.mkShell {
     kubectl
     kubernetes-controller-tools
     kubernetes-helm
+    make
+    minikube
     semver-tool
     yq-go
   ];
