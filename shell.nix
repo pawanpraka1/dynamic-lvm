@@ -7,8 +7,10 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     (minikube.override { withQemu = true; } )
     chart-testing
+    ginkgo
     git
     go_1_19
+    golint
     kubectl
     kubernetes-controller-tools
     kubernetes-helm
