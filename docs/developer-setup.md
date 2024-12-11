@@ -33,7 +33,7 @@ git remote -v
 ```
 
 Install the build dependencies.
-  * Run `make bootstrap` to install the required Go tools
+  * Run `make bootstrap` to install the required Go tools, Nix users can run `nix-shell`, it will bring up a shell with required tools installed
 
 ## Git Development Workflow
 

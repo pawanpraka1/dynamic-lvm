@@ -5,13 +5,14 @@ in
 pkgs.mkShell {
   name = "scripts-shell";
   buildInputs = with pkgs; [
-    semver-tool
-    kubectl
-    kubernetes-helm
-    yq-go
     (minikube.override { withQemu = true; } )
     chart-testing
+    git
     go_1_19
+    kubectl
     kubernetes-controller-tools
+    kubernetes-helm
+    semver-tool
+    yq-go
   ];
 }
