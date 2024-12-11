@@ -5,7 +5,7 @@ in
 pkgs.mkShell {
   name = "scripts-shell";
   buildInputs = with pkgs; [
-    (minikube.override { withQemu = true; } )
+    minikube
     chart-testing
     ginkgo
     git
