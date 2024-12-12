@@ -19,6 +19,7 @@ pkgs.mkShell {
   ];
   shellHook = ''
     export GOPATH=$(pwd)/nix/.go
+    export GOCACHE=$(pwd)/nix/.go/cache
     export TMPDIR=$(pwd)/nix/.tmp
     export PATH=$GOPATH/bin:$PATH
     mkdir -p "$TMPDIR"
