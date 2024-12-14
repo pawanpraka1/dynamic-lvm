@@ -18,6 +18,7 @@ pkgs.mkShell {
     yq-go
   ];
   shellHook = ''
+    export HOME=${builtins.getEnv "HOME"}
     export GOPATH=$(pwd)/nix/.go
     export GOCACHE=$(pwd)/nix/.go/cache
     export TMPDIR=$(pwd)/nix/.tmp
