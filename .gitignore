@@ -7,3 +7,4 @@ tags
 *.swn
 *.idea
 *.test
+coverage.txt
