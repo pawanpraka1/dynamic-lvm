@@ -23,6 +23,6 @@ pkgs.mkShell {
     export TMPDIR=$(pwd)/nix/.tmp
     export PATH=$GOPATH/bin:$PATH
     mkdir -p "$TMPDIR"
-    go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.0
+    make bootstrap
   '';
 }
