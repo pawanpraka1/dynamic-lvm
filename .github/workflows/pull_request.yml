@@ -45,8 +45,10 @@ jobs:
 
       - uses: cachix/install-nix-action@v22
       - uses: rrbutani/use-nix-shell-action@v1.1.0
+        env:
+          HOME: /home/runner
         with:
-            file: shell.nix
+          file: shell.nix
 
       - name: Check if the chart follows a valid semver version
         run: |
