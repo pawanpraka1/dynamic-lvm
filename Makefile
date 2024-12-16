@@ -11,7 +11,7 @@ EXTERNAL_TOOLS=\
 	golang.org/x/tools/cmd/cover \
 	golang.org/x/lint/golint \
 	github.com/axw/gocov/gocov \
-	gopkg.in/matm/v1/gocov-html \
+	github.com/matm/gocov-html/cmd/gocov-html \
 	github.com/onsi/ginkgo/ginkgo \
 	github.com/onsi/gomega/...
 
