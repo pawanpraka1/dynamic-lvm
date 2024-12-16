@@ -45,7 +45,7 @@ jobs:
           flags: unittests
 
   bdd-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: ["unit-tests"]
     strategy:
       fail-fast: true
