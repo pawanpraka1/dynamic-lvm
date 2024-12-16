@@ -82,7 +82,7 @@ jobs:
 
   bdd-tests:
     needs: ["unit-tests"]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
       matrix:
