@@ -1,8 +1,6 @@
 module github.com/openebs/lvm-localpv
 
-go 1.22.0
-
-toolchain go1.22.7
+go 1.19
 
 require (
 	github.com/container-storage-interface/spec v1.8.0
