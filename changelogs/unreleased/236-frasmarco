@@ -1,0 +1,1 @@
+Disable lvm archive in order to limit space usage when creating **lots** of volumes
