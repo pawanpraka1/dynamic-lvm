@@ -46,6 +46,9 @@ RUN apk add --no-cache lvm2 lvm2-extra util-linux device-mapper
 RUN apk add --no-cache btrfs-progs xfsprogs xfsprogs-extra e2fsprogs e2fsprogs-extra
 RUN apk add --no-cache ca-certificates libc6-compat
 
+# Disable lvm archiving
+RUN sed -i -r -e '/^\s*#?\s*archive\s*=/s/^.*$/        archive = 0/' /etc/lvm/lvm.conf
+
 ARG DBUILD_DATE
 ARG DBUILD_REPO_URL
 ARG DBUILD_SITE_URL
