@@ -16,14 +16,16 @@ pkgs.mkShell {
     minikube
     semver-tool
     yq-go
-  ];
+    which
+    curl
+    cacert
+    util-linux
+  ] ++ pkgs.lib.optional (builtins.getEnv "IN_NIX_SHELL" == "pure") docker;
   shellHook = ''
-    export HOME=${builtins.getEnv "HOME"}
     export GOPATH=$(pwd)/nix/.go
     export GOCACHE=$(pwd)/nix/.go/cache
     export TMPDIR=$(pwd)/nix/.tmp
     export PATH=$GOPATH/bin:$PATH
     mkdir -p "$TMPDIR"
-    make bootstrap
   '';
 }
