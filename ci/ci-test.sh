@@ -3,6 +3,7 @@
 set -e
 
 SNAP_CLASS="$(realpath deploy/sample/lvmsnapclass.yaml)"
+export OPENEBS_NAMESPACE=${OPENEBS_NAMESPACE:-openebs}
 
 export TEST_DIR="tests"
 
@@ -73,7 +74,7 @@ sudo sed -i '/^[^#]*thin_pool_autoextend_percent/ s/= .*/= 20/' /etc/lvm/lvm.con
 
 # Prepare env for running BDD tests
 # Minikube is already running
-helm install lvm-localpv ./deploy/helm/charts -n "$OPENEBS_NAMESPACE" --create-namespace --set lvmPlugin.pullPolicy=Never --set analytics.enabled=false
+helm install lvm-localpv ./deploy/helm/charts -n "$OPENEBS_NAMESPACE" --create-namespace --set lvmPlugin.image.pullPolicy=Never --set analytics.enabled=false
 kubectl apply -f "${SNAP_CLASS}"
 
 dumpAgentLogs() {
