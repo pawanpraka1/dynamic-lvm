@@ -139,7 +139,7 @@ install-golangci-lint:
 
 .PHONY: controller-gen
 controller-gen:
-	TMP_DIR=$(shell mktemp -d) && cd $$TMP_DIR && go mod init tmp && go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.0 && rm -rf $$TMP_DIR;
+	@go install -mod=mod sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.0
 
 # SRC_PKG is the path of code files
 SRC_PKG := github.com/openebs/lvm-localpv/pkg

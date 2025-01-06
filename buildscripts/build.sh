@@ -88,10 +88,6 @@ XC_ARCH=$(go env GOARCH)
 # Build!
 echo "==> Building ${CTLNAME} using $(go version)... "
 
-if [ -n "$IN_NIX_SHELL" ]; then
-    MAYBE_STATIC="-linkmode external -extldflags -static"
-fi
-
 GOOS="${XC_OS}"
 GOARCH="${XC_ARCH}"
 output_name=bin/"$PNAME"/"$GOOS"_"$GOARCH"/"$CTLNAME"
@@ -99,9 +95,15 @@ output_name=bin/"$PNAME"/"$GOOS"_"$GOARCH"/"$CTLNAME"
 if [ "$GOOS" = "windows" ]; then
     output_name+='.exe'
 fi
-env GOOS="$GOOS" GOARCH="$GOARCH" go build -ldflags \
+
+if command -v musl-gcc; then
+    CC="musl-gcc"
+fi
+
+env CC="$CC" GOOS="$GOOS" GOARCH="$GOARCH" go build -ldflags \
     "-X github.com/openebs/lvm-localpv/pkg/version.GitCommit=${GIT_COMMIT} \
     -X main.CtlName='${CTLNAME}' \
+    -linkmode external -extldflags -static \
     -X github.com/openebs/lvm-localpv/pkg/version.Version=${VERSION} \
     -X github.com/openebs/lvm-localpv/pkg/version.VersionMeta=${VERSION_META}" \
     -o "$output_name" \

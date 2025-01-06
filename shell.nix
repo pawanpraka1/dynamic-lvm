@@ -20,6 +20,7 @@ pkgs.mkShell {
     curl
     cacert
     util-linux
+    musl
   ] ++ pkgs.lib.optional (builtins.getEnv "IN_NIX_SHELL" == "pure") docker;
   shellHook = ''
     export GOPATH=$(pwd)/nix/.go
@@ -27,5 +28,6 @@ pkgs.mkShell {
     export TMPDIR=$(pwd)/nix/.tmp
     export PATH=$GOPATH/bin:$PATH
     mkdir -p "$TMPDIR"
+    make bootstrap
   '';
 }
