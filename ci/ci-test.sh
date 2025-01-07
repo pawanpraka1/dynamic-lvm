@@ -46,7 +46,8 @@ cleanup() {
   kubectl delete -f "${SNAP_CLASS}"
 
   helm uninstall lvm-localpv -n "$OPENEBS_NAMESPACE" || true
-  kubectl delete crds "$CRDS_TO_DELETE_ON_CLEANUP"
+  # shellcheck disable=SC2086
+  kubectl delete crds $CRDS_TO_DELETE_ON_CLEANUP
   # always return true
   return 0
 }
