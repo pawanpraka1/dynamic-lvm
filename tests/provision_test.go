@@ -282,6 +282,8 @@ func leakProtectionTest() {
 	By("Creating default storage class", createStorageClass)
 	ds := deleteNodeDaemonSet() // ensure that provisioning remains in pending state.
 
+	time.Sleep(30 * time.Second)
+
 	By("Creating PVC", createPVC)
 	time.Sleep(30 * time.Second) // wait for external provisioner to pick up new pvc
 	By("Verify pending lvm volume resource")

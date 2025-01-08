@@ -3,6 +3,7 @@
 set -e
 
 SNAP_CLASS="$(realpath deploy/sample/lvmsnapclass.yaml)"
+export OPENEBS_NAMESPACE=${OPENEBS_NAMESPACE:-openebs}
 
 export TEST_DIR="tests"
 
@@ -19,7 +20,7 @@ CRDS_TO_DELETE_ON_CLEANUP="lvmnodes.local.openebs.io lvmsnapshots.local.openebs.
 
 # Clean up generated resources for successive tests.
 cleanup_loopdev() {
-  sudo losetup -l | grep '(deleted)' | awk '{print $1}' \
+  losetup -l | grep '(deleted)' | awk '{print $1}' \
     | while IFS= read -r disk
       do
         sudo losetup -d "${disk}"
@@ -35,24 +36,41 @@ cleanup_foreign_lvmvg() {
   cleanup_loopdev
 }
 
+# Clean up loop devices and vgs created by the ginkgo lvm_utils.go
+cleanup_ginkgo_loop_lvm() {
+  for device in $(losetup -l -J | jq -r '.loopdevices[]|select(."back-file" | startswith("/tmp/openebs_lvm_localpv_disk_"))' | jq -r '.name'); do
+    echo "Found stale loop device: $device"
+
+    sudo "$(which vgremove)" -y --select="pv_name=$device" || :
+    sudo losetup -d "$device" 2>/dev/null || :
+  done
+}
+
 cleanup() {
   set +e
 
   echo "Cleaning up test resources"
 
   cleanup_foreign_lvmvg
+  cleanup_ginkgo_loop_lvm
 
-  kubectl delete pvc -n "$OPENEBS_NAMESPACE" lvmpv-pvc
-  kubectl delete -f "${SNAP_CLASS}"
+  if kubectl get nodes 2>/dev/null; then
+    kubectl delete pvc -n "$OPENEBS_NAMESPACE" lvmpv-pvc
+    kubectl delete -f "${SNAP_CLASS}"
 
-  helm uninstall lvm-localpv -n "$OPENEBS_NAMESPACE" || true
-  kubectl delete crds "$CRDS_TO_DELETE_ON_CLEANUP"
+    kubectl delete pvc -n "$OPENEBS_NAMESPACE" lvmpv-pvc
+    kubectl delete -f "${SNAP_CLASS}"
+
+    helm uninstall lvm-localpv -n "$OPENEBS_NAMESPACE" || true
+    # shellcheck disable=SC2086
+    kubectl delete crds $CRDS_TO_DELETE_ON_CLEANUP
+  fi
   # always return true
   return 0
 }
 # trap "cleanup 2>/dev/null" EXIT
-[ -n "${CLEANUP_ONLY}" ] && cleanup 2>/dev/null && exit 0
-[ -n "${RESET}" ] && cleanup 2>/dev/null
+[ -n "${CLEANUP_ONLY}" ] && cleanup && exit 0
+[ -n "${RESET}" ] && cleanup
 
 
 # setup a foreign lvm to test
@@ -72,7 +90,7 @@ sudo sed -i '/^[^#]*thin_pool_autoextend_percent/ s/= .*/= 20/' /etc/lvm/lvm.con
 
 # Prepare env for running BDD tests
 # Minikube is already running
-helm install lvm-localpv ./deploy/helm/charts -n "$OPENEBS_NAMESPACE" --create-namespace --set lvmPlugin.pullPolicy=Never --set analytics.enabled=false
+helm install lvm-localpv ./deploy/helm/charts -n "$OPENEBS_NAMESPACE" --create-namespace --set lvmPlugin.image.pullPolicy=Never --set analytics.enabled=false
 kubectl apply -f "${SNAP_CLASS}"
 
 dumpAgentLogs() {

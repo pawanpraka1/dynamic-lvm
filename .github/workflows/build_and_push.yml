@@ -49,6 +49,11 @@ jobs:
           go-version: 1.19.9
           cache: false
 
+      - name: Set go env
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
+
       - name: Unit test
         run: make test
 
@@ -77,6 +82,11 @@ jobs:
           go-version: 1.19.9
           cache: false
 
+      - name: Set go env
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
+
       - name: Setup Minikube-Kubernetes
         uses: medyagh/setup-minikube@latest
         with:
@@ -99,7 +109,7 @@ jobs:
         run: ./ci/ci-test.sh
 
       - name: Upload Coverage Report
-        uses: codecov/codecov-action@v4  
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./tests/bdd_coverage.txt

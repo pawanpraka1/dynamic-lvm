@@ -10,10 +10,10 @@ VETARGS?=-asmdecl -atomic -bool -buildtags -copylocks -methods \
 EXTERNAL_TOOLS=\
 	golang.org/x/tools/cmd/cover \
 	golang.org/x/lint/golint \
-	github.com/axw/gocov/gocov \
+	github.com/axw/gocov/gocov@v1.1 \
 	github.com/matm/gocov-html/cmd/gocov-html \
 	github.com/onsi/ginkgo/ginkgo \
-	github.com/onsi/gomega/...
+	github.com/onsi/gomega/...@v1.35
 
 # The images can be pushed to any docker/image registeries
 # like docker hub, quay. The registries are specified in
@@ -86,6 +86,9 @@ clean:
 	@echo "--> Cleaning Directory" ;
 	go clean -testcache
 	rm -rf bin
+	CLEANUP_ONLY=1 ./ci/ci-test.sh
+	chmod -R u+w ${GOPATH}/bin/${CSI_DRIVER} 2>/dev/null || true
+	chmod -R u+w ${GOPATH}/pkg/* 2>/dev/null || true
 	rm -rf ${GOPATH}/bin/${CSI_DRIVER}
 	rm -rf ${GOPATH}/pkg/*
 
@@ -119,7 +122,10 @@ verify-deps: deps
 bootstrap: controller-gen install-golangci-lint
 	@for tool in  $(EXTERNAL_TOOLS) ; do \
 		echo "+ Installing $$tool" ; \
-		cd && GO111MODULE=on go install $$tool@latest; \
+		if ! echo $$tool | grep "@"; then \
+			tool=$$tool@latest ; \
+		fi ; \
+		GO111MODULE=on go install $$tool; \
 	done
 
 ## golangci-lint tool used to check linting tools in codebase
@@ -130,11 +136,11 @@ bootstrap: controller-gen install-golangci-lint
 ## Install golangci-lint only if tool doesn't exist in system
 .PHONY: install-golangci-lint
 install-golangci-lint:
-	$(if $(shell which golangci-lint), echo "golangci-lint already exist in system", (curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b "${GOPATH}/bin" v1.56.2))
+	$(if $(shell which golangci-lint), echo "golangci-lint already exist in system", (curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "${GOPATH}/bin" v1.56.2))
 
 .PHONY: controller-gen
 controller-gen:
-	TMP_DIR=$(shell mktemp -d) && cd $$TMP_DIR && go mod init tmp && go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.0 && rm -rf $$TMP_DIR;
+	@go install -mod=mod sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.0
 
 # SRC_PKG is the path of code files
 SRC_PKG := github.com/openebs/lvm-localpv/pkg
@@ -222,15 +228,8 @@ lvm-driver-image: lvm-driver
 	@echo "+ Generating ${CSI_DRIVER} image"
 	@echo "--------------------------------"
 	@cp bin/${CSI_DRIVER}/${CSI_DRIVER} buildscripts/${CSI_DRIVER}/
-	cd buildscripts/${CSI_DRIVER} && sudo docker build -t ${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG} ${DBUILD_ARGS} . && sudo docker tag ${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG} quay.io/${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG}
+	cd buildscripts/${CSI_DRIVER} && docker build -t ${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG} ${DBUILD_ARGS} . && docker tag ${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG} quay.io/${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG}
 	@rm buildscripts/${CSI_DRIVER}/${CSI_DRIVER}
-
-.PHONY: ansible-runner-image
-ansible-runner-image:
-	@echo "------------------"
-	@echo "--> Build ansible-runner image for lvm-localpv e2e-tests" 
-	@echo "------------------"
-	sudo docker build . -f e2e-tests/Dockerfile -t ${IMAGE_ORG}/lvm-localpv-e2e:ci
 
 .PHONY: ci
 ci:

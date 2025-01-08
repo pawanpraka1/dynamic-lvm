@@ -29,6 +29,11 @@ jobs:
           go-version: 1.19.9
           cache: false
 
+      - name: Set go env
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
+
       - name: Lint Check
         uses: golangci/golangci-lint-action@v4
         with:
@@ -71,6 +76,11 @@ jobs:
           go-version: 1.19.9
           cache: false
 
+      - name: Set go env
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
+
       - name: Unit test
         run: make test
 
@@ -99,8 +109,13 @@ jobs:
           go-version: 1.19.9
           cache: false
 
+      - name: Set go env
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
+
       - name: Build images locally
-        run: make lvm-driver-image || exit 1;
+        run: make lvm-driver-image
 
       - name: Setup Minikube-Kubernetes
         uses: medyagh/setup-minikube@latest
@@ -125,7 +140,7 @@ jobs:
         run: ./ci/ci-test.sh
 
       - name: Upload Coverage Report
-        uses: codecov/codecov-action@v4  
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./tests/bdd_coverage.txt
