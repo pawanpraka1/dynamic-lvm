@@ -87,6 +87,10 @@ type VolumeInfo struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum=yes;no
 	ThinProvision string `json:"thinProvision,omitempty"`
+
+	// FormatOptions specifies additional options while formatting filesystem
+	// +kubebuilder:validation:Optional
+	FormatOptions []string `json:"formatOptions,omitempty"`
 }
 
 // VolStatus string that specifies the current state of the volume provisioning request.

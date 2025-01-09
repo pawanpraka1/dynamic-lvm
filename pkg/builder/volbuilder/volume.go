@@ -169,6 +169,12 @@ func (b *Builder) WithVgPattern(pattern string) *Builder {
 	return b
 }
 
+// WithFormatOptions sets volume format options
+func (b *Builder) WithFormatOptions(formatOptions []string) *Builder {
+	b.volume.Object.Spec.FormatOptions = formatOptions
+	return b
+}
+
 // WithNodeName sets NodeID for creating the volume
 func (b *Builder) WithNodeName(name string) *Builder {
 	if name == "" {

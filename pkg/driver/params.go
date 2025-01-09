@@ -39,9 +39,10 @@ type VolumeParams struct {
 	// extra optional metadata passed by external provisioner
 	// if enabled. See --extra-create-metadata flag for more details.
 	// https://github.com/kubernetes-csi/external-provisioner#recommended-optional-arguments
-	PVCName      string
-	PVCNamespace string
-	PVName       string
+	PVCName       string
+	PVCNamespace  string
+	PVName        string
+	FormatOptions []string
 }
 
 // SnapshotParams holds collection of supported settings that can
@@ -72,6 +73,8 @@ func NewVolumeParams(m map[string]string) (*VolumeParams, error) {
 	if ok {
 		vgPattern = fmt.Sprintf("^%v$", volGroup)
 	}
+
+	params.FormatOptions = strings.Split(m["formatoptions"], " ")
 
 	var err error
 	if params.VgPattern, err = regexp.Compile(vgPattern); err != nil {

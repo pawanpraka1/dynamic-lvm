@@ -74,6 +74,12 @@ spec:
                 description: Capacity of the volume
                 minLength: 1
                 type: string
+              formatOptions:
+                description: FormatOptions specifies additional options while formatting
+                  filesystem
+                items:
+                  type: string
+                type: array
               ownerNodeID:
                 description: OwnerNodeID is the Node ID where the volume group is
                   present which is where the volume has been provisioned. OwnerNodeID
