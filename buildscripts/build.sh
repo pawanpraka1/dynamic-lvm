@@ -24,6 +24,8 @@ DIR="$( cd -P "$( dirname "$SOURCE" )/../" && pwd )"
 # Change into that directory
 cd "$DIR"
 
+git config --global --add safe.directory "$DIR"
+
 # Get the git commit
 if [ -f "$GOPATH"/src/github.com/openebs/lvm-localpv/GITCOMMIT ];
 then

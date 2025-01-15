@@ -86,7 +86,8 @@ func init() {
 
 	OpenEBSNamespace = os.Getenv("OPENEBS_NAMESPACE")
 	if OpenEBSNamespace == "" {
-		os.Setenv("OPENEBS_NAMESPACE", "openebs")
+		OpenEBSNamespace = "openebs"
+		os.Setenv("OPENEBS_NAMESPACE", OpenEBSNamespace)
 	}
 
 	var err error

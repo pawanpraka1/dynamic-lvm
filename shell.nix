@@ -1,6 +1,6 @@
 let
   sources = import ./nix/sources.nix;
-  pkgs = import sources.nixpkgs {};
+  pkgs = import sources.nixpkgs { };
 in
 pkgs.mkShell {
   name = "scripts-shell";
@@ -22,8 +22,9 @@ pkgs.mkShell {
     util-linux
     musl
     jq
-    lvm2
-  ] ++ pkgs.lib.optional (builtins.getEnv "IN_NIX_SHELL" == "pure") [ docker ];
+    lvm2_dmeventd
+    nixos-shell
+  ] ++ pkgs.lib.optional (builtins.getEnv "IN_NIX_SHELL" == "pure") [ docker-client ];
   shellHook = ''
     export GOPATH=$(pwd)/nix/.go
     export GOCACHE=$(pwd)/nix/.go/cache

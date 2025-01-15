@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# This ci scripts expects the kubernetes worker to be running on this very node.
+# The lvm container image must be pre-loaded into the node, example:
+# make lvm-driver-image
+# When running on cri-o, you can import it as such:
+# docker save openebs/lvm-driver | ctr images import -
+
 set -e
 
 SNAP_CLASS="$(realpath deploy/sample/lvmsnapclass.yaml)"
@@ -11,6 +17,11 @@ export TEST_DIR="tests"
 if [ -z "${KUBECONFIG}" ]
 then
   export KUBECONFIG="${HOME}/.kube/config"
+fi
+
+if [ -n "${SETUP_IMAGE}" ]; then
+  make lvm-driver-image
+  docker save openebs/lvm-driver | ctr images import -
 fi
 
 # foreign systemid for the testing environment.
@@ -72,7 +83,6 @@ cleanup() {
 [ -n "${CLEANUP_ONLY}" ] && cleanup && exit 0
 [ -n "${RESET}" ] && cleanup
 
-
 # setup a foreign lvm to test
 cleanup_foreign_lvmvg
 truncate -s 100G /tmp/openebs_ci_foreign_disk.img
@@ -85,6 +95,7 @@ sudo modprobe dm-snapshot
 sudo modprobe dm_thin_pool
 
 # Set the configuration for thin pool autoextend in lvm.conf
+# WARNING: this is modifying the host's settings!!!
 sudo sed -i '/^[^#]*thin_pool_autoextend_threshold/ s/= .*/= 50/' /etc/lvm/lvm.conf
 sudo sed -i '/^[^#]*thin_pool_autoextend_percent/ s/= .*/= 20/' /etc/lvm/lvm.conf
 
@@ -154,37 +165,37 @@ echo "running ginkgo test case"
 
 if ! ginkgo -v -coverprofile=bdd_coverage.txt -covermode=atomic; then
 
-sudo pvscan --cache
+  sudo pvscan --cache
 
-sudo lvdisplay
+  sudo lvdisplay
 
-sudo vgdisplay
+  sudo vgdisplay
 
-echo "******************** LVM Controller logs***************************** "
-dumpControllerLogs 1000
+  echo "******************** LVM Controller logs***************************** "
+  dumpControllerLogs 1000
 
-echo "********************* LVM Agent logs *********************************"
-dumpAgentLogs 1000
+  echo "********************* LVM Agent logs *********************************"
+  dumpAgentLogs 1000
 
-echo "get all the pods"
-kubectl get pods -owide --all-namespaces
+  echo "get all the pods"
+  kubectl get pods -owide --all-namespaces
 
-echo "get pvc and pv details"
-kubectl get pvc,pv -oyaml --all-namespaces
+  echo "get pvc and pv details"
+  kubectl get pvc,pv -oyaml --all-namespaces
 
-echo "get snapshot details"
-kubectl get volumesnapshot.snapshot -oyaml --all-namespaces
+  echo "get snapshot details"
+  kubectl get volumesnapshot.snapshot -oyaml --all-namespaces
 
-echo "get sc details"
-kubectl get sc --all-namespaces -oyaml
+  echo "get sc details"
+  kubectl get sc --all-namespaces -oyaml
 
-echo "get lvm volume details"
-kubectl get lvmvolumes.local.openebs.io -n "$OPENEBS_NAMESPACE" -oyaml
+  echo "get lvm volume details"
+  kubectl get lvmvolumes.local.openebs.io -n "$OPENEBS_NAMESPACE" -oyaml
 
-echo "get lvm snapshot details"
-kubectl get lvmsnapshots.local.openebs.io -n "$OPENEBS_NAMESPACE" -oyaml
+  echo "get lvm snapshot details"
+  kubectl get lvmsnapshots.local.openebs.io -n "$OPENEBS_NAMESPACE" -oyaml
 
-exit 1
+  exit 1
 fi
 
 printf "\n\n######### All test cases passed #########\n\n"
