@@ -6,7 +6,7 @@
 
 * You need to have a docker service installed on your local host/development machine. Docker is required for building lvm-driver container images and to push them into a Kubernetes cluster for testing.
 
-### Nix[nix]
+### [Nix][nix]
 
 This is the recommend way of setting up a development environment.
 Usually [Nix][nix-install] can be installed via (Do **not** use `sudo`!):
@@ -134,9 +134,19 @@ Always start with creating a new branch from develop to work on a new feature or
 
 Happy Hacking!
 
-### Building and Testing your changes
+### Keep your branch in sync
 
-#### Building
+[Rebasing](https://git-scm.com/docs/git-rebase) is very import to keep your branch in sync with the changes being made by others and to avoid huge merge conflicts while raising your Pull Requests. You will always have to rebase before raising the PR.
+
+```sh
+# While on your myfeature branch (see above)
+$ git fetch upstream
+$ git rebase upstream/develop
+```
+
+While you rebase your changes, you must resolve any conflicts that might arise and build and test your changes using the above steps.
+
+## Building
 
 Before starting, ensure you have installed all the dependencies.
 If you're using [nix], then simply enter the [nix-shell] which will setup a shell with all required packages:
@@ -161,7 +171,7 @@ We have several `make` commands available at your convenience:
 
 There are more commands, take your time to read through the the [Makefile](../Makefile) and [Makefile-buildx](../Makefile.buildx.mk).
 
-#### Testing
+## Testing
 
 Simple unit testing can be done via make:
 
@@ -181,7 +191,7 @@ The ci tests perform a more comprehensive testing, we need to make use of a [Kub
 Sadly at this point in time, the ci tests expect to be running on a throw-away single node [K8s] cluster. \
 This means your development/testing system must be running on this very same node. \
 
-##### Kubernetes Clusters
+### Kubernetes Clusters
 
 We suggest a few options for this:
 
@@ -190,13 +200,11 @@ We suggest a few options for this:
 * [minikube]
 * [kind]
 
-###### NixOs-Shell
+#### [NixOs-Shell][nixos-shell]
 
 If you're already using [nix-shell], then why not take this option? \
 How does it work? \
-It spawns a headless qemu virtual machines based on a [configuration file](../vm.nix).
-Mounts $HOME and the user's nix profile into the virtual machine.
-Provides console access in the same terminal window.
+It spawns a headless qemu virtual machines based on a [configuration file](../vm.nix) and it provides console access in the same terminal window.
 
 The provided [configuration file](../vm.nix) deploys as a single node [K3s] cluster with the required LVM2 tools.
 
@@ -224,7 +232,7 @@ nixos login: root
 
 Simply log in with the root user (no password) get hacking!
 To leave this shell you can use the key combination `Ctrl-a x`.
-You can then enter the nixos-shell again using the same command.
+You can then enter the [nixos-shell] again using the same command.
 If you've made irreparable damage to the virtual machine, simply delete it and start anew. This is as simple as:
 
 ```sh
@@ -233,37 +241,44 @@ rm nixos.qcow2
 nixos-shell
 ```
 
-###### MiniKube
+#### MiniKube
 
-To install minikube follow the doc [here](https://kubernetes.io/docs/tasks/tools/install-minikube/).
+To install minikube follow the doc [here](https://kubernetes.io/docs/tasks/tools/install-minikube/). \
 Setup the LVM Volume Group on the host, check Setup in [readme](../README.md).
 
-##### Running the tests
+> *NOTE*: the minikube cluster must be started with the [none driver](https://minikube.sigs.k8s.io/docs/drivers/none/)
+
+### Running the tests
 
 Integration tests are written in ginkgo and run against a [K8s] cluster.
 
 > *NOTE*: For nixos-shell, remember to run these command within the nixos-shell vm!
 
-Before running the tests, please ensure the test image is built and deployed in the cluster. \
-
-```sh
-make lvm-driver-image
-docker save openebs/lvm-driver | ctr images import -
-```
-
 Then you can run the tests:
 
 ```sh
-./ci/ci-test.sh
+./ci/ci-test.sh run
 ```
 
-> *WARNING*: The tests don't currently clean up after themselves properly, so a failed test may affect subsequent tests and even new test runs!
+> *WARNING*: Each individual tests don't currently clean up after themselves properly, so a failed test may affect subsequent tests and even new test runs!
 
-You can try to reset the test, between runs by either running the script with the env var `CLEANUP_ONLY=1` or `RESET=1` to cleanup and run, example:
+If the test script was killed before cleaning up, you can issue a cleanup as such:
 
 ```sh
-RESET=1 ./ci/ci-test.sh
+./ci/ci-test.sh clean
 ```
+
+You can also request one before running the tests:
+
+```sh
+./ci/ci-test.sh run --reset
+```
+
+> *WARNING*: If you modify the code, remember to rebuild and load the new image, example:
+>
+> ```sh
+> ./ci/ci-test.sh run --build
+> ```
 
 If this doesn't work, you might need to dig a little deeper, or, if you're on nixos-shell, simply start over again:
 
@@ -273,18 +288,6 @@ nixos-shell
 ```
 
 And there you have it, a clean VM ready to be broken again :)
-
-### Keep your branch in sync
-
-[Rebasing](https://git-scm.com/docs/git-rebase) is very import to keep your branch in sync with the changes being made by others and to avoid huge merge conflicts while raising your Pull Requests. You will always have to rebase before raising the PR.
-
-```sh
-# While on your myfeature branch (see above)
-$ git fetch upstream
-$ git rebase upstream/develop
-```
-
-While you rebase your changes, you must resolve any conflicts that might arise and build and test your changes using the above steps.
 
 ## Submission
 

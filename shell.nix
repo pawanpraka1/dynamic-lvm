@@ -3,7 +3,7 @@ let
   pkgs = import sources.nixpkgs { };
 in
 pkgs.mkShell {
-  name = "scripts-shell";
+  name = "lvm-shell";
   buildInputs = with pkgs; [
     chart-testing
     ginkgo
@@ -25,6 +25,9 @@ pkgs.mkShell {
     lvm2_dmeventd
     nixos-shell
   ] ++ pkgs.lib.optional (builtins.getEnv "IN_NIX_SHELL" == "pure") [ docker-client ];
+
+  PRE_COMMIT_ALLOW_NO_CONFIG = 1;
+
   shellHook = ''
     export GOPATH=$(pwd)/nix/.go
     export GOCACHE=$(pwd)/nix/.go/cache
