@@ -20,7 +20,6 @@ pkgs.mkShell {
     curl
     cacert
     util-linux
-    musl
     jq
     lvm2_dmeventd
     nixos-shell
