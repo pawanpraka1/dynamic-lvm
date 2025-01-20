@@ -67,6 +67,7 @@ in
       KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
       CI_K3S = "true";
       EDITOR = "vim";
+      GOPATH = "/lvm/nix/.go";
     };
 
     shellAliases = {
@@ -85,6 +86,7 @@ in
     '';
 
     shellInit = ''
+      export PATH=$GOPATH/bin:$PATH
       cd /lvm
     '';
 

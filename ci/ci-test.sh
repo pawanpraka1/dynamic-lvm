@@ -73,7 +73,7 @@ cleanup_foreign_lvmvg() {
 
 # Clean up loop devices and vgs created by the ginkgo lvm_utils.go
 cleanup_ginkgo_loop_lvm() {
-  for device in $(losetup -l -J | jq -r '.loopdevices[]|select(."back-file" | startswith("/tmp/openebs_lvm_localpv_disk_"))' | jq -r '.name'); do
+  for device in $(losetup -l -J | jq -r '.loopdevices[]|select(."back-file" | startswith("/tmp/openebs_lvm_localpv_disk_")) | .name'); do
     echo "Found stale loop device: $device"
 
     sudo "$(which vgremove)" -y --select="pv_name=$device" || :
@@ -90,7 +90,9 @@ cleanup() {
   cleanup_ginkgo_loop_lvm
 
   if kubectl get nodes 2>/dev/null; then
-    kubectl delete pvc -n "$OPENEBS_NAMESPACE" lvmpv-pvc
+    kubectl delete deployment -lrole=test -n "$OPENEBS_NAMESPACE"
+    kubectl delete pod -lrole=test --force -n "$OPENEBS_NAMESPACE"
+    kubectl delete pvc -n "$OPENEBS_NAMESPACE" --all
 
     sleep 3
 
@@ -264,7 +266,7 @@ BUILD_ALWAYS="false"
 while test $# -gt 0; do
   arg="$1"
   case "$arg" in
-    run | clean)
+    run | clean | load)
       [ -n "$COMMAND" ] && needs_help "Can't specify two commands"
       COMMAND="$1"
       ;;

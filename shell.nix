@@ -6,7 +6,6 @@ pkgs.mkShell {
   name = "lvm-shell";
   buildInputs = with pkgs; [
     chart-testing
-    ginkgo
     git
     go_1_19
     golint

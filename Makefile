@@ -86,7 +86,7 @@ clean:
 	@echo "--> Cleaning Directory" ;
 	go clean -testcache
 	rm -rf bin
-	CLEANUP_ONLY=1 ./ci/ci-test.sh run
+	./ci/ci-test.sh clean
 	chmod -R u+w ${GOPATH}/bin/${CSI_DRIVER} 2>/dev/null || true
 	chmod -R u+w ${GOPATH}/pkg/* 2>/dev/null || true
 	rm -rf ${GOPATH}/bin/${CSI_DRIVER}
