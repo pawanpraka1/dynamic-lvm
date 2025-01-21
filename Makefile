@@ -235,6 +235,10 @@ lvm-driver-image: lvm-driver
 image-tag:
 	@echo ${IMAGE_TAG}
 
+.PHONY: image-repo
+image-repo:
+	@echo ${IMAGE_ORG}/${CSI_DRIVER}
+
 .PHONY: image-ref
 image-ref:
 	@echo docker.io/${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG}

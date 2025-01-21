@@ -230,26 +230,52 @@ run() {
   printf "\n\n######### All test cases passed #########\n\n"
 }
 
-load_image() {
-  make lvm-driver-image
+load_k3s() {
   if [ "${CI_K3S:-}" = "true" ]; then
-    docker save openebs/lvm-driver | ctr images import -
+    local img="${1:-}"
+    if [ -z "${1:-}" ]; then
+      repo="$(make image-repo -s -C "$SCRIPT_DIR"/.. 2>/dev/null)"
+      tag="$(make image-tag -s -C "$SCRIPT_DIR"/.. 2>/dev/null)"
+      img="$repo:$tag"
+    fi
+    docker save "$img" | ctr images import -
   fi
 }
 
+load_image() {
+  make lvm-driver-image
+  load_k3s "${1:-}"
+}
+
 maybe_load_image() {
+  local repo tag img did cid
+
   if [ "$BUILD_ALWAYS" = "true" ]; then
     load_image
     return 0
   fi
 
-  local id
-  id=$(crictl image --output json | jq --arg image "$(make image-ref -s -C "$SCRIPT_DIR"/.. 2>/dev/null)" '.images[]|select(.repoTags[0] == $image)|.id')
-  if [ -n "$id" ]; then
+  repo="$(make image-repo -s -C "$SCRIPT_DIR"/.. 2>/dev/null)"
+  tag="$(make image-tag -s -C "$SCRIPT_DIR"/.. 2>/dev/null)"
+  img="$repo:$tag"
+
+  did="$(docker image ls --no-trunc --format json | jq -r --arg repo "$repo" --arg tag "$tag" 'select(.Repository == $repo and .Tag == $tag)|.ID')"
+  if [ -z "$did" ]; then
+    make lvm-driver-image
+  fi
+
+  if ! [ "${CI_K3S:-}" = "true" ]; then
     return 0
   fi
 
-  load_image
+  cid="$(crictl image --output json | jq -r --arg image "docker.io/$(make image-ref -s -C "$SCRIPT_DIR"/.. 2>/dev/null)" '.images[]|select(.repoTags[0] == $image)|.id')"
+  # If image not present, or different to the docker source, then rebuild it!
+  if [ -z "$cid" ] || [ "$cid" != "$did" ]; then
+    load_image "$img"
+    return 0
+  fi
+
+  return 0
 }
 
 # allow override
