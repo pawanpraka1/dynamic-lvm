@@ -213,14 +213,14 @@ manifests:
 	@echo "--------------------------------"
 	@echo "+ Generating LVM LocalPV crds"
 	@echo "--------------------------------"
-	$(PWD)/buildscripts/generate-manifests.sh
+	./buildscripts/generate-manifests.sh
 
 .PHONY: lvm-driver
 lvm-driver: format
 	@echo "--------------------------------"
 	@echo "--> Building ${CSI_DRIVER}        "
 	@echo "--------------------------------"
-	@PNAME=${CSI_DRIVER} CTLNAME=${CSI_DRIVER} sh -c "'$(PWD)/buildscripts/build.sh'"
+	@PNAME=${CSI_DRIVER} CTLNAME=${CSI_DRIVER} sh -c "'./buildscripts/build.sh'"
 
 .PHONY: lvm-driver-image
 lvm-driver-image: lvm-driver
@@ -242,7 +242,7 @@ image-ref:
 .PHONY: ci
 ci:
 	@echo "--> Running ci test";
-	$(PWD)/ci/ci-test.sh run
+	./ci/ci-test.sh run
 
 # Push lvm-driver images
 deploy-images:
