@@ -242,7 +242,7 @@ image-ref:
 .PHONY: ci
 ci:
 	@echo "--> Running ci test";
-	$(PWD)/ci/ci-test.sh
+	$(PWD)/ci/ci-test.sh run
 
 # Push lvm-driver images
 deploy-images:

@@ -277,7 +277,7 @@ You can also request one before running the tests:
 > *WARNING*: If you modify the code, remember to rebuild and load the new image, example:
 >
 > ```sh
-> ./ci/ci-test.sh run --build
+> ./ci/ci-test.sh run --build-always
 > ```
 
 If this doesn't work, you might need to dig a little deeper, or, if you're on nixos-shell, simply start over again:
