@@ -106,7 +106,7 @@ jobs:
       - name: Running tests
         env:
           OPENEBS_NAMESPACE: "openebs"
-        run: ./ci/ci-test.sh
+        run: ./ci/ci-test.sh run
 
       - name: Upload Coverage Report
         uses: codecov/codecov-action@v4

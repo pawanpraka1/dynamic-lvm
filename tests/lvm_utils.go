@@ -233,14 +233,18 @@ func VerifyThinpoolExtend() {
 		thinpool,
 	}
 
-	// stdout will contain the size
-	stdout, _, err = execAtLocal("sudo", nil, args...)
-	gomega.Expect(err).To(gomega.BeNil(), "display thinpool LV")
+	gomega.Eventually(func() bool {
+		// stdout will contain the size
+		stdout, _, err = execAtLocal("sudo", nil, args...)
+		gomega.Expect(err).To(gomega.BeNil(), "display thinpool LV")
 
-	// Remove unit suffix from the size.
-	size_str := strings.TrimSuffix(strings.TrimSpace(string(stdout)), "B")
-	// This expectation is a factor of the lvm.conf settings we do from ci-test.sh
-	// and the original volume size.
-	size_int64, _ := strconv.ParseInt(size_str, 10, 64)
-	gomega.Expect(size_int64).To(gomega.Equal(expect_size))
+		// Remove unit suffix from the size.
+		size_str := strings.TrimSuffix(strings.TrimSpace(string(stdout)), "B")
+		// This expectation is a factor of the lvm.conf settings we do from ci-test.sh
+		// and the original volume size.
+		size_int64, _ := strconv.ParseInt(size_str, 10, 64)
+		return size_int64 == expect_size
+	},
+		45*time.Second, 5*time.Second).
+		Should(gomega.BeTrue())
 }

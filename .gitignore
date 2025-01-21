@@ -9,3 +9,4 @@ tags
 *.test
 coverage.txt
 /tests/bdd_coverage.txt
+/nixos.qcow2

@@ -3,7 +3,6 @@ package tests
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -430,7 +429,6 @@ func resizeAndVerifyPVC(shouldPass bool, size string) {
 func createDeployVerifyApp() {
 	ginkgo.By("creating and deploying app pod")
 	createAndDeployAppPod(appNames)
-	time.Sleep(30 * time.Second)
 	ginkgo.By("verifying app pods are running", verifyAppPodRunning)
 }
 
@@ -438,6 +436,10 @@ func createAndDeployAppPod(appnames []string) {
 	var err error
 	rwmode := "write"
 	for index, appname := range appnames {
+		labels := map[string]string{
+			"role": "test",
+			"app":  appname,
+		}
 		// only one app should do the write to ensure data safety.
 		if index > 0 {
 			rwmode = "read"
@@ -446,23 +448,11 @@ func createAndDeployAppPod(appnames []string) {
 		deployObj, err = deploy.NewBuilder().
 			WithName(appname).
 			WithNamespace(OpenEBSNamespace).
-			WithLabelsNew(
-				map[string]string{
-					"app": appname,
-				},
-			).
-			WithSelectorMatchLabelsNew(
-				map[string]string{
-					"app": appname,
-				},
-			).
+			WithLabelsNew(labels).
+			WithSelectorMatchLabelsNew(labels).
 			WithPodTemplateSpecBuilder(
 				pts.NewBuilder().
-					WithLabelsNew(
-						map[string]string{
-							"app": appname,
-						},
-					).
+					WithLabelsNew(labels).
 					WithContainerBuilders(
 						container.NewBuilder().
 							WithImage("xridge/fio").
@@ -508,27 +498,19 @@ func createAndDeployAppPod(appnames []string) {
 func createAndDeployBlockAppPod() {
 	var err error
 	for _, appName := range appNames {
+		labels := map[string]string{
+			"role": "test",
+			"app":  appName,
+		}
 		ginkgo.By("building app " + appName + " pod deployment using above lvm volume")
 		deployObj, err = deploy.NewBuilder().
 			WithName(appName).
 			WithNamespace(OpenEBSNamespace).
-			WithLabelsNew(
-				map[string]string{
-					"app": appName,
-				},
-			).
-			WithSelectorMatchLabelsNew(
-				map[string]string{
-					"app": appName,
-				},
-			).
+			WithLabelsNew(labels).
+			WithSelectorMatchLabelsNew(labels).
 			WithPodTemplateSpecBuilder(
 				pts.NewBuilder().
-					WithLabelsNew(
-						map[string]string{
-							"app": appName,
-						},
-					).
+					WithLabelsNew(labels).
 					WithContainerBuilders(
 						container.NewBuilder().
 							WithImage("xridge/fio").
@@ -573,20 +555,23 @@ func createAndDeployBlockAppPod() {
 
 func createDeployVerifyBlockApp() {
 	ginkgo.By("creating and deploying app pod", createAndDeployBlockAppPod)
-	time.Sleep(30 * time.Second)
 	ginkgo.By("verifying app pod is running", verifyAppPodRunning)
 }
 
 func verifyAppPodRunning() {
 	var err error
 	for _, appName := range appNames {
-		labelValue := fmt.Sprintf("app=%s", appName)
-		appPod, err = PodClient.WithNamespace(OpenEBSNamespace).
-			List(metav1.ListOptions{
-				LabelSelector: labelValue,
-			},
-			)
-		gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "while verifying application pod")
+		labelValue := fmt.Sprintf("role=test,app=%s", appName)
+		gomega.Eventually(func() bool {
+			appPod, err = PodClient.WithNamespace(OpenEBSNamespace).
+				List(metav1.ListOptions{
+					LabelSelector: labelValue,
+				})
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred(), "while verifying application pod")
+			return len(appPod.Items) == 1
+		},
+			60, 5).
+			Should(gomega.BeTrue())
 
 		status := IsPodRunningEventually(OpenEBSNamespace, appPod.Items[0].Name)
 		gomega.Expect(status).To(gomega.Equal(true), "while checking status of pod {%s}", appPod.Items[0].Name)

@@ -86,7 +86,7 @@ clean:
 	@echo "--> Cleaning Directory" ;
 	go clean -testcache
 	rm -rf bin
-	CLEANUP_ONLY=1 ./ci/ci-test.sh
+	./ci/ci-test.sh clean
 	chmod -R u+w ${GOPATH}/bin/${CSI_DRIVER} 2>/dev/null || true
 	chmod -R u+w ${GOPATH}/pkg/* 2>/dev/null || true
 	rm -rf ${GOPATH}/bin/${CSI_DRIVER}
@@ -230,6 +230,14 @@ lvm-driver-image: lvm-driver
 	@cp bin/${CSI_DRIVER}/${CSI_DRIVER} buildscripts/${CSI_DRIVER}/
 	cd buildscripts/${CSI_DRIVER} && docker build -t ${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG} ${DBUILD_ARGS} . && docker tag ${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG} quay.io/${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG}
 	@rm buildscripts/${CSI_DRIVER}/${CSI_DRIVER}
+
+.PHONY: image-tag
+image-tag:
+	@echo ${IMAGE_TAG}
+
+.PHONY: image-ref
+image-ref:
+	@echo docker.io/${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG}
 
 .PHONY: ci
 ci:

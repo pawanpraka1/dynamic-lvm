@@ -1,12 +1,11 @@
 let
   sources = import ./nix/sources.nix;
-  pkgs = import sources.nixpkgs {};
+  pkgs = import sources.nixpkgs { };
 in
 pkgs.mkShell {
-  name = "scripts-shell";
+  name = "lvm-shell";
   buildInputs = with pkgs; [
     chart-testing
-    ginkgo
     git
     go_1_19
     golint
@@ -20,10 +19,13 @@ pkgs.mkShell {
     curl
     cacert
     util-linux
-    musl
     jq
-    lvm2
-  ] ++ pkgs.lib.optional (builtins.getEnv "IN_NIX_SHELL" == "pure") [ docker ];
+    lvm2_dmeventd
+    nixos-shell
+  ] ++ pkgs.lib.optional (builtins.getEnv "IN_NIX_SHELL" == "pure") [ docker-client ];
+
+  PRE_COMMIT_ALLOW_NO_CONFIG = 1;
+
   shellHook = ''
     export GOPATH=$(pwd)/nix/.go
     export GOCACHE=$(pwd)/nix/.go/cache
