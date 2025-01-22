@@ -105,6 +105,7 @@ cleanup() {
       # shellcheck disable=SC2086
       kubectl delete crds $CRDS_TO_DELETE_ON_CLEANUP
       kubectl delete -f "${SNAP_CLASS}"
+      kubectl delete pod -lrole=openebs-lvm --force -n "$OPENEBS_NAMESPACE"
     fi
   fi
 
@@ -162,7 +163,8 @@ dump_logs() {
 }
 
 isPodReady(){
-  [ "$(kubectl get po "$1" -o 'jsonpath={.status.conditions[?(@.type=="Ready")].status}' -n "$OPENEBS_NAMESPACE")" = 'True' ]
+  [ "$(kubectl get po "$1" -o 'jsonpath={.status.conditions[?(@.type=="Ready")].status}' -n "$OPENEBS_NAMESPACE")" = 'True' ] &&
+  [ "$(kubectl get po "$1" -o 'jsonpath={.metadata.deletionTimestamp}' -n "$OPENEBS_NAMESPACE")" = "" ]
 }
 
 isDriverReady(){
