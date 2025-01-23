@@ -213,14 +213,14 @@ manifests:
 	@echo "--------------------------------"
 	@echo "+ Generating LVM LocalPV crds"
 	@echo "--------------------------------"
-	$(PWD)/buildscripts/generate-manifests.sh
+	./buildscripts/generate-manifests.sh
 
 .PHONY: lvm-driver
 lvm-driver: format
 	@echo "--------------------------------"
 	@echo "--> Building ${CSI_DRIVER}        "
 	@echo "--------------------------------"
-	@PNAME=${CSI_DRIVER} CTLNAME=${CSI_DRIVER} sh -c "'$(PWD)/buildscripts/build.sh'"
+	@PNAME=${CSI_DRIVER} CTLNAME=${CSI_DRIVER} sh -c "'./buildscripts/build.sh'"
 
 .PHONY: lvm-driver-image
 lvm-driver-image: lvm-driver
@@ -235,6 +235,10 @@ lvm-driver-image: lvm-driver
 image-tag:
 	@echo ${IMAGE_TAG}
 
+.PHONY: image-repo
+image-repo:
+	@echo ${IMAGE_ORG}/${CSI_DRIVER}
+
 .PHONY: image-ref
 image-ref:
 	@echo docker.io/${IMAGE_ORG}/${CSI_DRIVER}:${IMAGE_TAG}
@@ -242,7 +246,7 @@ image-ref:
 .PHONY: ci
 ci:
 	@echo "--> Running ci test";
-	$(PWD)/ci/ci-test.sh
+	./ci/ci-test.sh run
 
 # Push lvm-driver images
 deploy-images:
