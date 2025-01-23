@@ -215,6 +215,8 @@ func GetVolAndMountInfo(
 		return nil, nil, err
 	}
 
+	mountinfo.FormatOptions = vol.Spec.FormatOptions
+
 	return vol, &mountinfo, nil
 }
 
