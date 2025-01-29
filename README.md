@@ -108,7 +108,7 @@ helm install openebs --namespace openebs openebs/openebs --create-namespace
 
 **NOTE:** If you are running a custom Kubelet location, or a Kubernetes distribution that uses a custom Kubelet location, the `kubelet` directory must be changed on the helm values at install-time using the flag option `--set lvm-localpv.lvmNode.kubeletDir=<your-directory-path>` in the `helm install` command.
 
-- For `microk8s`, we need to change the kubelet directory to `/var/snap/microk8s/common/var/lib/kubelet/`, we need to replace `/var/lib/kubelet/` with `/var/snap/microk8s/common/var/lib/kubelet/`.
+- `microk8s` now symlinks `/var/lib/kubelet/` to its custom directory, so setting the custom value is likely unnecessary. However, you can still replace `/var/lib/kubelet/` with `/var/snap/microk8s/common/var/lib/kubelet/` if desired.
 - For `k0s`, the default directory (`/var/lib/kubelet`) should be changed to `/var/lib/k0s/kubelet`.
 - For `RancherOS`, the default directory (`/var/lib/kubelet`) should be changed to `/opt/rke/var/lib/kubelet`.
 
