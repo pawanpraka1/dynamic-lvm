@@ -95,3 +95,7 @@ allowedTopologies:
 The LVM LocalPV CSI driver will schedule the PV to the nodes where label "openebs.io/rack" is set to "rack1".
 
 Note that if storageclass is using Immediate binding mode and storageclass allowedTopologies is not mentioned then all the nodes should be labeled using "ALLOWED_TOPOLOGIES" keys, that means, "ALLOWED_TOPOLOGIES" keys should be present on all nodes, nodes can have different values for those keys. If some nodes don't have those keys, then LVMPV's default scheduler can not effectively do the volume capacity based scheduling. Here, in this case the CSI provisioner will pick keys from any random node and then prepare the preferred topology list using the nodes which has those keys defined and LVMPV scheduler will schedule the PV among those nodes only.
+
+### 2. How to upgrade the driver to newer version
+
+Please refer to the documentation at <https://openebs.io/docs/user-guides/upgrade>.

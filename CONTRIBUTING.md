@@ -1,11 +1,8 @@
 # Contributing Guidelines
 
-<BR>
-
 ## Umbrella Project
 
-OpenEBS is an "umbrella project". Every project, repository and file in the OpenEBS organization adopts and follows the policies found in the Community repo umbrella project files.
-<BR>
+OpenEBS is an "umbrella project". Every sub-project, repository and file in the OpenEBS organization adopts and follows the policies found in the Community repo umbrella project files.
 
 This project follows the [OpenEBS Contributor Guidelines](https://github.com/openebs/community/blob/HEAD/CONTRIBUTING.md)
 

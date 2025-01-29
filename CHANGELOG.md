@@ -1,3 +1,12 @@
+lvm-localpv-1.6.2 / 2024-09-19
+========================
+<b>NOTE</b>: This was only a chart release that addressed a bug on prior chart. 
+* fix(chart): revert env OPENEBS_NAMESPACE to LVM_NAMESPACE for v1.6.x ([#333](https://github.com/openebs/lvm-localpv/pull/333),[@niladrih](https://github.com/niladrih))
+
+v1.6.1 / 2024-09-16
+========================
+* chore(deps): update analytics dependency ([#325](https://github.com/openebs/lvm-localpv/pull/325),[@niladrih](https://github.com/niladrih))
+
 v1.6.0 / 2024-07-03
 ========================
 * feat(analytics): add heartbeat pinger ([#318](https://github.com/openebs/lvm-localpv/pull/318),[@niladrih](https://github.com/niladrih))

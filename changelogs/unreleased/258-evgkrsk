@@ -1,1 +1,0 @@
-Change lvm-controller's Kind from StatefulSet to Deployment (#196)
