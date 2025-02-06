@@ -1,61 +1,90 @@
-## OpenEBS - LocalPV-LVM CSI Driver
+## OpenEBS Local PV LVM
+
+[![CNCF Status](https://img.shields.io/badge/cncf%20status-sandbox-blue.svg)](https://www.cncf.io/projects/openebs/)
+[![LICENSE](https://img.shields.io/github/license/openebs/openebs.svg)](./LICENSE)
 [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B162%2Fgithub.com%2Fopenebs%2Flvm-localpv.svg?type=shield&issueType=license)](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2Fopenebs%2Flvm-localpv?ref=badge_shield&issueType=license)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/4548/badge)](https://www.bestpractices.dev/projects/4548)
 [![Slack](https://img.shields.io/badge/chat-slack-ff1493.svg?style=flat-square)](https://kubernetes.slack.com/messages/openebs)
 [![Community Meetings](https://img.shields.io/badge/Community-Meetings-blue)](https://us05web.zoom.us/j/87535654586?pwd=CigbXigJPn38USc6Vuzt7qSVFoO79X.1)
 [![Go Report](https://goreportcard.com/badge/github.com/openebs/lvm-localpv)](https://goreportcard.com/report/github.com/openebs/lvm-localpv)
-
-| [![Linux LVM2](https://github.com/openebs/website/blob/main/website/public/images/png/LVM_logo_1.png "Linux LVM2")](https://github.com/openebs/website/blob/main/website/public/images/png/LVM_logo_1.png) | The OpenEBS LocalPV-LVM Data-Engine is a mature and well deployed production grade CSI driver for dynamically provisioning Node Local Volumes into a K8s cluster utilizing the LINUX LVM2 Data / storage Mgmt stack as the storage backend. It integrates LVM2 into the OpenEBS platform and exposes many LVM2 services and capabilities.   |
-| :---  | :--- |
-<BR>
+[![CLOMonitor](https://img.shields.io/endpoint?url=https://clomonitor.io/api/projects/cncf/openebs/badge)](https://clomonitor.io/projects/cncf/openebs)
+[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/openebs)](https://artifacthub.io/packages/helm/openebs/openebs)
 
 ## Overview
-LocalPV-LVM CSI Driver became GA in August 2021 (with the release v0.8.0). It is now a very mature product and a core component of the OpenEBS storage platform.
-Due to the major adoption of LocalPV-LVM (+50,000 users), this Data-Engine is now being unified and integrated into the core OpenEBS Storage platform; instead of being maintained as an external Data-Engine within our project.
 
-Our [2024 Roadmap is here](https://github.com/openebs/openebs/blob/main/ROADMAP.md). It defines a rich set of new features, which covers the integration of LocalPV-LVM into the core OpenEBS platform.<br>
-Please review this roadmap and feel free to pass back any feedback on it, as well as recommend and suggest new ideas regarding LocalPV-LVM. We welcome all your feedback.
-<br>
-<BR>
+### What is OpenEBS Local PV LVM?
+OpenEBS Local PV LVM is a [CSI](https://github.com/container-storage-interface/spec) plugin for implementation of [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)) backed persistent volumes for Kubernetes. It is a local storage solution, which means the device, volume and the application are on the same host. It doesn't contain any dataplane, i.e only its simply a control-plane for the kernel lvm volumes. It mainly comprises of two components which are implemented in accordance to the CSI Specs:
 
-> **LocalPV-LVM is very popular** : Live OpenEBS systems actively report back product metrics every day, to our Global Anaytics metrics engine (unless disabled by the user).
-> Here are our key project popularity metrics as of: 01 Mar 2024 <BR>
->
-> :rocket: &nbsp; OpenEBS is the #1 deployed Storage Platform for Kubernetes <BR>
-> :zap: &nbsp; LocalPV-LVM is the 3rd most deployed Data-Engine within the platform <BR>
-> :sunglasses: &nbsp; LocalPV-LVM has +50,000 Daily Active Users <BR>
-> :sunglasses: &nbsp; LocalPV-LVM has +120,000 Global installations <BR>
-> :floppy_disk: &nbsp; +49 Million OpenEBS Volumes have been deployed globally <BR>
-> :tv: &nbsp; We have +8 Million Global OpenEBS installations <BR>
-> :star: &nbsp; We are the [#1 GitHub Star ranked](https://github.com/openebs/website/blob/main/website/public/images/png/github_star-history-2024_Feb_1.png) K8s Data Storage platform <BR>
+1. CSI Controller - Frontends the incoming requests and initiates the operation.
+2. CSI Node Plugin - Serves the requests by performing the operations and making the volume available for the initiator.
 
-<BR>
+### Why OpenEBS Local PV LVM?
+1. Lightweight, easy to set up storage provisoner for host-local volumes in K8s ecosystem.
+2. Makes LVM stack available to K8s, allowing end users to use the LVM functionalites like snapshot, thin provisioning, resize, etc for their Persistent Volumes.
+3. Cloud native, i.e based on CSI spec, hence suitable for all K8s deployments.
 
-## Dev Activity dashboard
-![Alt](https://repobeats.axiom.co/api/embed/baab8c2a9d1606494ab32714cbf91b65845a6001.svg "Repobeats analytics image")
+### Architecture
 
+LocalPV refers to storage that is directly attached to a specific node in the Kubernetes cluster. It uses locally available disks (e.g., SSDs, HDDs) on the node.
 
-## Project info
-The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects/30). This tracks our base historical engineering development work and is now somewhat out of date. We will be publish an updated 2024 Unified Roadmp soon, as LocalPV-LVM is now being integrated and unified into the core OpenEBS storage platform.<BR>
+<b>Use Case</b>: Ideal for workloads that require low-latency access to storage or when data locality is critical (e.g., databases, caching systems).
 
-<BR>
+#### Characteristics:
+- <b>Node-bound</b>: The volume is tied to the node where the disk is physically located.
+- <b>No replication</b>: Data is not replicated across nodes, so if the node fails, the data may become inaccessible.
+- <b>High performance</b>: Since the storage is local, it typically offers lower latency compared to network-attached storage.
 
-## Usage and Deployment
+The diagram below depicts the mapping to the host disks, the LVM stack on top of the disks and the kubernetes persistent volumes to be consumed by the workload. Local PV LVM CSI Controller upon creation of the Persistent Volume Claim, creates a LVMVolume CR, which emits an event for Local PV LVM CSI Node Plugin to create the LV(logical volume). When workloads are scheduled the Local PV LVM CSI Node Plugin makes this zvol/dataset available via a mount point on the host.
 
-## Prerequisites
+```mermaid
+graph TD;
+  subgraph Node2["Node 2"]
+    subgraph K8S_NODE1[" "]
+      N1_PV1["PV"] --> N1_APP1["APP"]
+      N1_PV2["PV"] --> N1_APP2["APP"]
+    end
+    subgraph LVM_Stack2["LVM Stack"]
+      P1_1["PV"] --> V1_1["VG"]
+      P1_2["PV"] --> V1_1
+      V1_1 --> L1_1["LV"]
+      V1_1 --> L3_1["LV"]
+      L1_1 --> N1_PV1 
+      L3_1 --> N1_PV2
+    end
+    subgraph Blockdevices1[" "]
+      D1["/dev/sdc"] --> P1_1
+      D2["/dev/sdb"] --> P1_2
+    end
+  end
 
+  subgraph Node1["Node 1"]
+    subgraph K8S_NODE2[" "]
+      N2_PV1["PV"] --> N2_APP1["APP"]
+    end
+    subgraph LVM_Stack1["LVM Stack"]
+      P2_2["PV"] --> V2_2["VG"]
+      V2_2 --> Z2_2["LV"]
+      Z2_2 --> N2_PV1 
+    end
+    subgraph Blockdevices2[" "]
+      D3["/dev/sdb"] --> P2_2
+    end
+  end
 
-> [!IMPORTANT]
-> Before installing the LocalPV-LVM driver please make sure your Kubernetes Cluster meets the following prerequisites:
-> 1. All the nodes must have LVM2 utils package installed
-> 2. All the nodes must have dm-snapshot Kernel Module loaded - (Device Mapper Snapshot)
-> 3. You have access to install RBAC components into `<OPENEBS>` namespace.
-<BR>
+  classDef pv fill:#FFCC00,stroke:#FF9900,color:#000;
+  classDef app fill:#99CC00,stroke:#66CC00,color:#000;
+  classDef disk fill:#FF6666,stroke:#FF3333,color:#000;
+  classDef vg fill:#FFCCFF,stroke:#FF99FF,color:#000;
+  classDef lv fill:#99CCFF,stroke:#6699FF,color:#000;
 
-<!-- > [!NOTE]
-> - LocalPV-LVM will not provision the VG for the user <BR>
-> - The required Physical Volumes(PV) and Volume Group(VG) names will need to be created and present beforehand. <BR>
-> - Dynamic RAID provisioning is still in development. RAID LV's must be deployed via the manual pre configuration method <BR> -->
+  class N1_PV1,N1_PV2,N2_PV1 pv;
+  class N1_APP1,N1_APP2,N2_APP1 app;
+  class D1,D2,D3 disk;
+  class P1_1,P1_2,P2_2 vg;
+  class V1_1,V2_2 lv;
+  class L1_1,L3_1,Z2_2 lv;
+
+```
 
 ### Supported System
 
@@ -67,169 +96,17 @@ The orignal v1.0 dev roadmap [is here ](https://github.com/orgs/openebs/projects
 > | LVM2 | 2.03.21 |
 > | Min RAM | LVM2 is a kernel native module. It is very efficent and fast. It has no strict memory requirements |
 > Stability | LVM2 is extremly stable and very mature. The Kernel was released ~2005. It exists in most LINUX distros |
-<BR>
-<BR>
 
-## Setup
+### Documents
 
-Find the disk which you want to use for the LocalPV-LVM. Note: For testing you can use the loopback device.
-
-```
-truncate -s 1024G /tmp/disk.img
-sudo losetup -f /tmp/disk.img --show
-```
-
-> [!NOTE]
-> - LocalPV-LVM will not provision the VG for the user <BR>
-> - The required Physical Volumes(PV) and Volume Group(VG) names will need to be created and present beforehand.
-
-Create the Volume group on all the nodes, which will be used by the LVM2 Driver for provisioning the volumes
-
-```
-sudo pvcreate /dev/loop0
-sudo vgcreate lvmvg /dev/loop0       ## here lvmvg is the volume group name to be created
-```
-<BR>
-<BR>
-
-## Installation
-
-Install the latest release of OpenEBS LVM2 LocalPV-LVM driver by running the following command. Note: All nodes must be running the same version of LocalPV-LVM, LMV2, device-mapper & dm-snapshot.
-
-**NOTE:** Installation using operator YAMLs is not the supported way any longer.  
-We can install the latest release of OpenEBS LVM driver by running the following command:
-```bash
-helm repo add openebs https://openebs.github.io/openebs
-helm repo update
-helm install openebs --namespace openebs openebs/openebs --create-namespace
-```
-
-**NOTE:** If you are running a custom Kubelet location, or a Kubernetes distribution that uses a custom Kubelet location, the `kubelet` directory must be changed on the helm values at install-time using the flag option `--set lvm-localpv.lvmNode.kubeletDir=<your-directory-path>` in the `helm install` command.
-
-- For `microk8s`, we need to change the kubelet directory to `/var/snap/microk8s/common/var/lib/kubelet/`, we need to replace `/var/lib/kubelet/` with `/var/snap/microk8s/common/var/lib/kubelet/`.
-- For `k0s`, the default directory (`/var/lib/kubelet`) should be changed to `/var/lib/k0s/kubelet`.
-- For `RancherOS`, the default directory (`/var/lib/kubelet`) should be changed to `/opt/rke/var/lib/kubelet`.
-
-Verify that the LVM driver Components are installed and running using below command. Depending on number of nodes, you will see one lvm-controller pod and lvm-node daemonset running on the nodes :
-```bash
-$ kubectl get pods -n openebs -l role=openebs-lvm
-NAME                                              READY   STATUS    RESTARTS   AGE
-openebs-lvm-localpv-controller-7b6d6b4665-fk78q   5/5     Running   0          11m
-openebs-lvm-localpv-node-mcch4                    2/2     Running   0          11m
-openebs-lvm-localpv-node-pdt88                    2/2     Running   0          11m
-openebs-lvm-localpv-node-r9jn2                    2/2     Running   0          11m
-```
-
-Once LVM driver is installed and running we can provision a volume.
-
-### Deployment
-
-
-#### 1. Create a Storage class
-
-```
-$ cat sc.yaml
-
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: openebs-lvmpv
-parameters:
-  storage: "lvm"
-  volgroup: "lvmvg"
-provisioner: local.csi.openebs.io
-```
-
-Check the doc on [storageclasses](docs/storageclasses.md) to know all the supported parameters for LocalPV-LVM
-
-##### VolumeGroup Availability
-
-If LVM volume group is available on certain nodes only, then make use of topology to tell the list of nodes where we have the volgroup available.
-As shown in the below storage class, we can use allowedTopologies to describe volume group availability on nodes.
-
-```
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: openebs-lvmpv
-allowVolumeExpansion: true
-parameters:
-  storage: "lvm"
-  volgroup: "lvmvg"
-provisioner: local.csi.openebs.io
-allowedTopologies:
-- matchLabelExpressions:
-  - key: kubernetes.io/hostname
-    values:
-      - lvmpv-node1
-      - lvmpv-node2
-```
-
-The above storage class tells that volume group "lvmvg" is available on nodes lvmpv-node1 and lvmpv-node2 only. The LVM driver will create volumes on those nodes only.
-
-Please note that the provisioner name for LVM driver is "local.csi.openebs.io", we have to use this while creating the storage class so that the volume provisioning/deprovisioning request can come to LVM driver.
-
-#### 2. Create the PVC
-
-```
-$ cat pvc.yaml
-
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: csi-lvmpv
-spec:
-  storageClassName: openebs-lvmpv
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 4Gi
-```
-
-Create a PVC using the storage class created for the LVM driver.
-
-#### 3. Deploy the application
-
-Create the deployment yaml using the pvc backed by LVM storage.
-
-```
-$ cat fio.yaml
-
-apiVersion: v1
-kind: Pod
-metadata:
-  name: fio
-spec:
-  restartPolicy: Never
-  containers:
-  - name: perfrunner
-    image: openebs/tests-fio
-    command: ["/bin/bash"]
-    args: ["-c", "while true ;do sleep 50; done"]
-    volumeMounts:
-       - mountPath: /datadir
-         name: fio-vol
-    tty: true
-  volumes:
-  - name: fio-vol
-    persistentVolumeClaim:
-      claimName: csi-lvmpv
-```
-
-After the deployment of the application, we can go to the node and see that the lvm volume is being used
-by the application for reading/writing the data and space is consumed from the LVM. Please note that to check the provisioned volumes on the node, we need to run `pvscan --cache` command to update the lvm cache and then we can use lvdisplay and all other lvm commands on the node.
-
-#### 4. Deprovisioning
-
-for deprovisioning the volume we can delete the application which is using the volume and then we can go ahead and delete the pv, as part of deletion of pv this volume will also be deleted from the volume group and data will be freed.
-
-```
-$ kubectl delete -f fio.yaml
-pod "fio" deleted
-$ kubectl delete -f pvc.yaml
-persistentvolumeclaim "csi-lvmpv" deleted
-```
+- [Prerequisites](./docs/quickstart.md#prerequisites)
+- [Quickstart](./docs/quickstart.md#setup)
+- [Developer Setup](./docs/developer-setup.md#development-workflow)
+- [Testing](./docs/developer-setup.md#testing)
+- [Contibuting Guidelines](./CONTRIBUTING.md)
+- [Governance](./GOVERNANCE.md)
+- [Changelog](./CHANGELOG.md)
+- [Release Process](./RELEASE.md)
 
 Features
 ---
@@ -244,7 +121,9 @@ Features
 - [x] Supports fsTypes: `ext4`, `btrfs`, `xfs`
 - [x] Volume metrics
 - [x] Topology
-- [x] [Snapshot](docs/snapshot.md)
+- [x] Snapshot
+    - [x] [Create](docs/snapshot.md)
+    - [ ] Restore
 - [ ] Clone
 - [x] [Volume Resize](docs/resize.md)
 - [x] [Thin Provision](docs/thin_provision.md)
@@ -252,8 +131,17 @@ Features
 - [ ] Ephemeral inline volume
 
 ### Limitation
-- Resize of volumes with snapshot is not supported
+- Resize of volumes with snapshot is not supported.
+- Restore of a volume from snapshot is not supported.
+- Clone of a volume from volume is not supported.
 
+
+## Dev Activity dashboard
+![Alt](https://repobeats.axiom.co/api/embed/baab8c2a9d1606494ab32714cbf91b65845a6001.svg "Repobeats analytics image")
 
 ## License Compliance
 [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B162%2Fgithub.com%2Fopenebs%2Flvm-localpv.svg?type=large&issueType=license)](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2Fopenebs%2Flvm-localpv?ref=badge_large&issueType=license)
+
+## OpenEBS is a [CNCF Sandbox Project](https://www.cncf.io/projects/openebs)
+
+![OpenEBS is a CNCF Sandbox Project](https://github.com/cncf/artwork/blob/main/other/cncf/horizontal/color/cncf-color.png)
