@@ -12,24 +12,25 @@
 
 ## Overview
 
-### What is OpenEBS Local PV LVM?
 OpenEBS Local PV LVM is a [CSI](https://github.com/container-storage-interface/spec) plugin for implementation of [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)) backed persistent volumes for Kubernetes. It is a local storage solution, which means the device, volume and the application are on the same host. It doesn't contain any dataplane, i.e only its simply a control-plane for the kernel lvm volumes. It mainly comprises of two components which are implemented in accordance to the CSI Specs:
 
 1. CSI Controller - Frontends the incoming requests and initiates the operation.
 2. CSI Node Plugin - Serves the requests by performing the operations and making the volume available for the initiator.
 
-### Why OpenEBS Local PV LVM?
+## Why OpenEBS Local PV LVM?
+
 1. Lightweight, easy to set up storage provisoner for host-local volumes in K8s ecosystem.
 2. Makes LVM stack available to K8s, allowing end users to use the LVM functionalites like snapshot, thin provisioning, resize, etc for their Persistent Volumes.
 3. Cloud native, i.e based on CSI spec, hence suitable for all K8s deployments.
 
-### Architecture
+## Architecture
 
 LocalPV refers to storage that is directly attached to a specific node in the Kubernetes cluster. It uses locally available disks (e.g., SSDs, HDDs) on the node.
 
 <b>Use Case</b>: Ideal for workloads that require low-latency access to storage or when data locality is critical (e.g., databases, caching systems).
 
-#### Characteristics:
+### Characteristics:
+
 - <b>Node-bound</b>: The volume is tied to the node where the disk is physically located.
 - <b>No replication</b>: Data is not replicated across nodes, so if the node fails, the data may become inaccessible.
 - <b>High performance</b>: Since the storage is local, it typically offers lower latency compared to network-attached storage.
@@ -86,7 +87,7 @@ graph TD;
 
 ```
 
-### Supported System
+## Supported System
 
 > | Name | Version |
 > | :--- | :--- |
@@ -97,7 +98,7 @@ graph TD;
 > | Min RAM | LVM2 is a kernel native module. It is very efficent and fast. It has no strict memory requirements |
 > Stability | LVM2 is extremly stable and very mature. The Kernel was released ~2005. It exists in most LINUX distros |
 
-### Documents
+## Documents
 
 - [Prerequisites](./docs/quickstart.md#prerequisites)
 - [Quickstart](./docs/quickstart.md#setup)
@@ -130,16 +131,18 @@ Features
 - [ ] Backup/Restore
 - [ ] Ephemeral inline volume
 
-### Limitation
+## Limitation
+
 - Resize of volumes with snapshot is not supported.
 - Restore of a volume from snapshot is not supported.
 - Clone of a volume from volume is not supported.
 
-
 ## Dev Activity dashboard
-![Alt](https://repobeats.axiom.co/api/embed/baab8c2a9d1606494ab32714cbf91b65845a6001.svg "Repobeats analytics image")
+
+![Alt](https://repobeats.axiom.co/api/embed/1bb8799af15de72cbe5cca8edb1641c7fdc31cb2.svg "Repobeats analytics image")
 
 ## License Compliance
+
 [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B162%2Fgithub.com%2Fopenebs%2Flvm-localpv.svg?type=large&issueType=license)](https://app.fossa.com/projects/custom%2B162%2Fgithub.com%2Fopenebs%2Flvm-localpv?ref=badge_large&issueType=license)
 
 ## OpenEBS is a [CNCF Sandbox Project](https://www.cncf.io/projects/openebs)
