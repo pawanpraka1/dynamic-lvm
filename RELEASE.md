@@ -7,11 +7,11 @@ Local PV LVM tries to follow semantic versioning principles as specified here ht
 Every release has a pre-release version that gets created on branch creation, explained further below. This pre-release version is meant for all the below action items throughout the release process:
 
 - Platform Verification
-- Regression and Feature Verification Automated tests
-- Exploratory testing by QA engineers
-- Strict security scanners on the container images
-- Upgrade from previous releases
-- Beta testing by users on issues that they are interested in
+- Automated Regression & Feature Testing
+- Exploratory Testing by QA engineers
+- Strict Security Scanning on container images
+- Upgrade Testing from previous releases
+- Beta Testing by users on relevant issues
 
 If any issues are found during the above stages, they are fixed and the prerelease version is overridden by the newer changes and are up for above action items again.
 
@@ -31,7 +31,51 @@ Once the release is triggered, the unchanged code undergoes stages as such linti
 
 The helm charts are hosted on github deployments for the corresponding releases.
 
-The tagged images are published at: <https://hub.docker.com/r/openebs/lvm-driver/tags>
-The release Helm charts are published at: <https://github.com/openebs/lvm-localpv/tree/gh-pages>
+2. **Automated Version Updates:**
+   - Two automated PRs update chart versions:
+     - `release/2.7` branch → `2.7.0-prerelease`
+     - `develop` branch → `2.8.0-develop`
+   - Once merged, the updated images and Helm charts are published for testing.
 
-It should be verified if all significant changes to the project have been itemized on to the CHANGELOG.md file, before a release is cut.
+3. **Final Release Creation:**
+   - When the release branch is ready, the repo owner **creates a release with tag `X.Y.Z`** (e.g., `2.7.0`).
+   - The release process includes:
+     - Linting, unit tests, and BDD tests
+     - Code coverage updates
+     - Image builds with the specific tag (e.g., `2.7.0`)
+     - Helm chart updates and publishing
+
+4. **Post-GA Version Increments:**
+   - After the release is GA (General Availability):
+     - The next **pre-release version** (`2.7.1-prerelease`) is published.
+     - The **develop branch** continues with `2.8.0-develop` for the next major/minor release cycle.
+
+### Patch Release Process
+
+1. **Branching & Changes:**
+   - Patch releases are made against the existing release branch (e.g., `release/2.7`).
+   - All merged changes are available for testing via the **prerelease version** (`2.7.1-prerelease`).
+
+2. **Final Patch Release Creation:**
+   - When ready, the repo owner **creates a release with tag `X.Y.Z+1`** (e.g., `2.7.1`).
+   - The release process includes:
+     - Linting, unit tests, and BDD tests
+     - Code coverage updates
+     - Image builds with the specific tag (e.g., `2.7.1`)
+     - Helm chart updates and publishing
+
+3. **Post-GA Version Increments:**
+   - Once the patch is GA:
+     - The next **pre-release version** (`2.7.2-prerelease`) is published.
+     - The **develop branch** continues with `2.8.0-develop` for the next major/minor release cycle.
+
+## Release Artifacts
+
+- **Container Images:** Published at [Docker Hub](https://hub.docker.com/r/openebs/lvm-driver/tags)
+- **Helm Charts:** Hosted on [GitHub Deployments](https://github.com/openebs/lvm-localpv/tree/gh-pages)
+
+Before finalizing a release or patch release, it is ensured that **all significant changes** are documented in `CHANGELOG.md`.
+
+---
+
+This document streamlines the release process it ensuring all necessary details remain intact.
